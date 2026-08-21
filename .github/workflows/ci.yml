@@ -1,0 +1,49 @@
+name: CI
+
+# Runs the same gate as `npm run verify`: build, lint, and the on-page SEO
+# audit. Vercel deploys independently of this workflow, so a red run here does
+# not block a deploy — wire it into branch protection if it should.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: npm ci
+
+      - name: Typecheck, build, and prerender
+        run: npm run build
+        env:
+          # Build against the real production origin so the audit checks the
+          # canonicals that will actually ship.
+          VITE_SITE_URL: ${{ vars.SITE_URL || 'https://sultan-motors.vercel.app' }}
+
+      - name: Lint
+        run: npm run lint
+
+      - name: On-page SEO audit
+        run: npm run audit
+
+      - name: Upload build output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
