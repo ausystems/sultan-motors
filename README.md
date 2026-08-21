@@ -36,6 +36,83 @@ No `aggregateRating` or `review` markup is emitted. Review structured data must
 describe reviews that genuinely exist and are visible on the page; inventing it
 is a manual-action risk. Wire it to real Google reviews before adding any.
 
+## Deploying
+
+The repository is committed and ready to push. Both steps below need an
+interactive login, so they have to be run by someone with access to the
+accounts.
+
+### 1. Push to GitHub
+
+Create an empty repository (no README, no .gitignore — this repo already has
+both), then:
+
+```bash
+git remote add origin git@github.com:<you>/sultan-motors.git
+git push -u origin main
+```
+
+If you use the GitHub CLI, `gh repo create sultan-motors --private --source=. --push`
+does both in one step after `gh auth login`.
+
+### 2. Deploy to Vercel
+
+Import the repository at [vercel.com/new](https://vercel.com/new). `vercel.json`
+already sets the build command, output directory, headers, and redirects, so
+accept the defaults — do **not** let the dashboard override Framework Preset to
+"Vite", which would replace the prerender build with a plain `vite build` and
+drop every prerendered route.
+
+The build needs no environment variables to be correct. `resolveSiteUrl` in
+`vite.config.ts` falls back to `VERCEL_PROJECT_PRODUCTION_URL`, so canonicals,
+Open Graph URLs, JSON-LD `@id`s, the sitemap, and `robots.txt` all
+self-reference the Vercel domain on the first deploy.
+
+Preview and branch deployments detect `VERCEL_ENV !== 'production'` and ship
+`noindex` on every page plus a `Disallow: /` robots.txt, so a preview URL cannot
+compete with production in the index.
+
+### 3. Point the real domain at it
+
+Add the domain in Vercel under Settings → Domains, set the `www` (or apex) form
+as **Primary** so Vercel issues the canonical-host redirect, then set the
+environment variable so the markup agrees with the domain:
+
+| Variable | Value | Environments |
+| --- | --- | --- |
+| `VITE_SITE_URL` | `https://www.your-domain.ca` | Production |
+
+Redeploy after setting it. Until you do, every canonical points at the
+`.vercel.app` domain — correct while that is the live URL, wrong the moment a
+custom domain becomes primary.
+
+### 4. Verify the deployment
+
+```bash
+npm run verify
+```
+
+against a local build, then against the live URL:
+
+```bash
+curl -sI https://<your-domain>/                        # 200
+curl -sI https://<your-domain>/brake-repair-brampton   # 200
+curl -sI https://<your-domain>/nope                    # 404, not 200
+curl -sI https://<your-domain>/dent-repair-brampton    # 301 -> /auto-body-repair-brampton
+curl -s  https://<your-domain>/robots.txt              # Allow, correct Sitemap host
+curl -s  https://<your-domain>/sitemap.xml | head      # 15 URLs on the live host
+```
+
+The `/nope` check is the important one. If it returns 200, something added an
+SPA catch-all rewrite, and every bad URL on the site has become a soft 404.
+
+Then confirm a page ships its content without JavaScript — this is what the
+prerendering exists for:
+
+```bash
+curl -s https://<your-domain>/brake-repair-brampton | grep -c '<h1'
+```
+
 ## Google Search Console
 
 Verify the property once the domain is live, then submit the sitemap.
