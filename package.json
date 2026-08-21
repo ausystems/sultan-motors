@@ -1,0 +1,40 @@
+{
+  "name": "sultan-motors",
+  "description": "Auto repair and collision shop website for Sultan Motors, Brampton, Ontario. Vite + React + TypeScript, prerendered to static HTML.",
+  "private": true,
+  "license": "UNLICENSED",
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build && npm run build:ssr && node scripts/prerender.mjs",
+    "build:ssr": "vite build --ssr src/entry-server.tsx --outDir .ssr-dist",
+    "build:client": "tsc -b && vite build",
+    "images": "python3 scripts/optimize_images.py",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "serve": "node scripts/serve_dist.mjs",
+    "audit": "python3 scripts/audit_seo.py",
+    "verify": "npm run build && npm run lint && npm run audit"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2",
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "oxlint": "^1.75.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0"
+  }
+}

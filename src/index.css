@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(100% 0 0);
+  --foreground: oklch(12.9% 0.042 264.695);
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(12.9% 0.042 264.695);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(12.9% 0.042 264.695);
+  --primary: oklch(20.8% 0.042 265.755);
+  --primary-foreground: oklch(98.4% 0.003 247.858);
+  --secondary: oklch(96.8% 0.007 247.896);
+  --secondary-foreground: oklch(20.8% 0.042 265.755);
+  --muted: oklch(96.8% 0.007 247.896);
+  --muted-foreground: oklch(55.4% 0.046 257.417);
+  --accent: oklch(96.8% 0.007 247.896);
+  --accent-foreground: oklch(20.8% 0.042 265.755);
+  --destructive: oklch(57.7% 0.245 27.325);
+  --destructive-foreground: oklch(98.4% 0.003 247.858);
+  --border: oklch(92.9% 0.013 255.508);
+  --input: oklch(92.9% 0.013 255.508);
+  --ring: oklch(70.4% 0.04 256.788);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
+
+/*
+ * Homepage service marquee. Runs in CSS rather than JavaScript so the effect
+ * costs nothing on the main thread and needs no animation library in the
+ * bundle. The track renders its items twice, so -50% is one seamless loop.
+ */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-animate {
+  animation: marquee-scroll 30s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-animate {
+    animation: none;
+  }
+}

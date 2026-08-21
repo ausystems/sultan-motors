@@ -1,0 +1,36 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sultan-motors",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 5173,
+      "autoPort": true
+    },
+    {
+      "name": "sultan-motors-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--port",
+        "4173"
+      ],
+      "port": 4173,
+      "autoPort": true
+    },
+    {
+      "name": "sultan-motors-static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve_dist.mjs"
+      ],
+      "port": 4180,
+      "autoPort": false
+    }
+  ]
+}

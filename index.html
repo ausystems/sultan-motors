@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en-CA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0d0e10" />
+    <meta name="author" content="Sultan Motors" />
+    <meta name="geo.region" content="CA-ON" />
+    <meta name="geo.placename" content="Brampton, Ontario" />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- The embedded shop map is the only third-party origin the pages touch. -->
+    <link rel="preconnect" href="https://maps.google.com" />
+    <link rel="dns-prefetch" href="https://maps.gstatic.com" />
+
+    <!--
+      Everything between these markers is replaced per route by
+      scripts/prerender.mjs. The defaults below describe the homepage, so the
+      template is still correct if it is ever served unprerendered.
+    -->
+    <!--seo-head-->
+    <title>Auto Repair &amp; Collision Shop Brampton | Sultan Motors</title>
+    <meta
+      name="description"
+      content="Sultan Motors is a full service auto repair and collision shop in Brampton, ON. Diagnostics, engine, brake, bodywork and paint. Call (905) 799-1331."
+    />
+    <!--/seo-head-->
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
