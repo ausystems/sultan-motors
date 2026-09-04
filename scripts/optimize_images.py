@@ -264,9 +264,113 @@ def build_service_cards() -> None:
         print(f"  og/{out.name:<48} {kb(out.stat().st_size)}")
 
 
+# --------------------------------------------------------------------------- #
+# App icons                                                                     #
+# --------------------------------------------------------------------------- #
+
+# The brand mark is a single "S" — the shop's initial — in near-black on the
+# brand yellow, matching the site's primary CTA (yellow field, black text).
+#
+# One letter, not "SM": at 16x16 in a browser tab a two-letter monogram
+# collapses into an unreadable smudge, which is exactly what the previous icon
+# did. A single glyph can be set far larger and heavier and still read.
+INK = (13, 14, 16)
+# Cap height as a share of the icon box. Tuned so the S fills the tile without
+# crowding the corner radius.
+GLYPH_FILL = 0.60
+# iOS-style continuous-corner approximation.
+CORNER_RATIO = 0.22
+# Everything is drawn at this multiple and downsampled, so edges and the corner
+# radius stay clean at 16px.
+SS = 8
+
+
+def _draw_mark(px: int, *, rounded: bool, glyph_fill: float = GLYPH_FILL) -> Image.Image:
+    """Renders the S mark at `px`, supersampled then reduced."""
+    big = px * SS
+    tile = Image.new("RGBA", (big, big), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(tile)
+
+    if rounded:
+        draw.rounded_rectangle(
+            [0, 0, big - 1, big - 1],
+            radius=int(big * CORNER_RATIO),
+            fill=BRAND_YELLOW + (255,),
+        )
+    else:
+        draw.rectangle([0, 0, big - 1, big - 1], fill=BRAND_YELLOW + (255,))
+
+    # Size the glyph by its rendered cap height rather than font metrics, which
+    # include ascender/descender space the letter S does not use.
+    target = big * glyph_fill
+    size = int(target * 1.4)
+    for _ in range(24):
+        font = load_font(size)
+        box = draw.textbbox((0, 0), "S", font=font)
+        h = box[3] - box[1]
+        if h <= 0:
+            break
+        if abs(h - target) <= max(1, big * 0.004):
+            break
+        size = max(1, int(size * target / h))
+    font = load_font(size)
+
+    # Centre on the glyph's ink, not on the text origin.
+    box = draw.textbbox((0, 0), "S", font=font)
+    draw.text(
+        ((big - (box[2] - box[0])) / 2 - box[0], (big - (box[3] - box[1])) / 2 - box[1]),
+        "S",
+        font=font,
+        fill=INK,
+    )
+    return tile.resize((px, px), Image.LANCZOS)
+
+
+def build_icons() -> None:
+    print("\n== App icons ==")
+
+    # Browser tab / PWA icons: rounded tile, transparent outside the corners.
+    for px, name in ((192, "icon-192.png"), (512, "icon-512.png")):
+        out = PUBLIC / name
+        _draw_mark(px, rounded=True).save(out, "PNG", optimize=True)
+        print(f"  {name:<34} {px}x{px}  {kb(out.stat().st_size)}")
+
+    # Android maskable: the launcher crops to its own shape, so the glyph has to
+    # sit inside the safe zone (centre 80%) and the field must be full bleed.
+    out = PUBLIC / "icon-maskable-512.png"
+    _draw_mark(512, rounded=False, glyph_fill=GLYPH_FILL * 0.8).save(out, "PNG", optimize=True)
+    print(f"  {out.name:<34} 512x512  {kb(out.stat().st_size)}  (safe-zone padded)")
+
+    # Apple touch icon: iOS applies its own mask and ignores transparency, so
+    # this one is a full-bleed opaque square.
+    out = PUBLIC / "apple-touch-icon.png"
+    Image.alpha_composite(
+        Image.new("RGBA", (180, 180), BRAND_YELLOW + (255,)),
+        _draw_mark(180, rounded=False),
+    ).convert("RGB").save(out, "PNG", optimize=True)
+    print(f"  {out.name:<34} 180x180  {kb(out.stat().st_size)}  (opaque, full bleed)")
+
+    # Multi-resolution .ico. Each size is rendered independently rather than
+    # letting Pillow downscale one bitmap, so the 16px entry stays legible.
+    ico = PUBLIC / "favicon.ico"
+    sizes = (16, 32, 48, 64, 128, 256)
+    frames = {px: _draw_mark(px, rounded=True) for px in sizes}
+    # The base image must be the LARGEST frame: Pillow clamps the requested
+    # sizes to the base image's dimensions, so saving the 16px frame as the base
+    # silently produces a single-entry 16x16 .ico.
+    frames[max(sizes)].save(
+        ico,
+        format="ICO",
+        sizes=[(s, s) for s in sizes],
+        append_images=[frames[s] for s in sizes if s != max(sizes)],
+    )
+    print(f"  {ico.name:<34} {'/'.join(str(s) for s in sizes)}  {kb(ico.stat().st_size)}")
+
+
 if __name__ == "__main__":
     build_hero_variants()
     compress_oversized()
     build_og_image()
     build_service_cards()
+    build_icons()
     print("\nDone.")
