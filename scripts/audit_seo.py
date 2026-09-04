@@ -87,7 +87,17 @@ class PageParser(HTMLParser):
         elif tag == "label":
             self.labels.append(a)
         elif tag in ("input", "textarea", "select"):
-            if a.get("type") not in ("hidden", "submit", "button", "image"):
+            # A control that is hidden from assistive tech AND out of the tab
+            # order is not user-facing — a spam honeypot is the usual case, and
+            # it is unlabelled on purpose. Anything a person can actually reach
+            # still has to carry a label.
+            hidden_from_at = (
+                a.get("aria-hidden") == "true" and a.get("tabindex") == "-1"
+            )
+            if (
+                a.get("type") not in ("hidden", "submit", "button", "image")
+                and not hidden_from_at
+            ):
                 self.controls.append({**a, "_tag": tag})
         elif tag in ("h1", "h2", "h3", "h4", "h5", "h6"):
             self._heading = tag

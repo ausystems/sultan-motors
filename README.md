@@ -36,6 +36,33 @@ No `aggregateRating` or `review` markup is emitted. Review structured data must
 describe reviews that genuinely exist and are visible on the page; inventing it
 is a manual-action risk. Wire it to real Google reviews before adding any.
 
+## Booking form
+
+`/contact` posts to [Formspree](https://formspree.io). The form id lives in
+`src/data/site.ts` as `FORMSPREE_FORM_ID` and can be overridden per environment
+with `VITE_FORMSPREE_FORM_ID` — point that at a scratch form when testing so
+real bookings are never mixed with test traffic.
+
+The wizard validates with zod across its steps and submits a plain object
+through `useSubmit` from `@formspree/react`, rather than letting the SDK read
+the DOM: only the current step's fields are mounted, so a FormData read at the
+review step would send almost nothing.
+
+Two behaviours worth preserving if this is ever rewritten:
+
+- **Nothing is confirmed until Formspree accepts the submission.** Before this
+  integration the form showed "APPOINTMENT CONFIRMED" from local state alone,
+  so a customer was told their slot was booked while the request never left the
+  browser. On failure the wizard stays on the review step, keeps every field
+  filled, and offers the shop's phone number.
+- **The local slot reservation only happens on success**, so a failed send
+  never marks a time as taken.
+
+Payload keys are written as email labels ("Drop off", "License plate") because
+Formspree renders them verbatim in the notification. A field named `email` sets
+the reply-to, and a hidden `_gotcha` honeypot lets Formspree drop bot
+submissions.
+
 ## Deploying
 
 The repository is committed and ready to push. Both steps below need an

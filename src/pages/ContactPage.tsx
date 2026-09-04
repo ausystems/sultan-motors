@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
+import { useSubmit } from '@formspree/react'
 import SiteNavbar from '../components/SiteNavbar'
 import SiteFooter from '../components/SiteFooter'
 import Seo from '../components/Seo'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { SkipToContent, Main } from '../components/PageShell'
 import { pageSeo, breadcrumbTrails } from '../data/seo'
-import { business } from '../data/site'
+import { business, FORMSPREE_FORM_ID } from '../data/site'
 
 /**
  * Practical detail for anyone about to book. This is the page's only body copy
@@ -106,6 +107,18 @@ function formatDate(value: string): string {
   })
 }
 
+/** Human label for the chosen service, including the free-text "other" case. */
+function serviceLabelFor(booking: BookingForm): string {
+  if (booking.service === 'other') {
+    return `Other: ${booking.otherService ?? ''}`.trim()
+  }
+  return (
+    serviceOptions.find((option) => option.id === booking.service)?.label ??
+    booking.service ??
+    ''
+  )
+}
+
 function toDateKey(date: Date): string {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date
     .getDate()
@@ -123,6 +136,10 @@ export default function ContactPage() {
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
   const [booked, setBooked] = useState<BookedSlots>({})
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
+  const [honeypot, setHoneypot] = useState('')
+  const sendBooking = useSubmit(FORMSPREE_FORM_ID)
 
   useEffect(() => {
     setBooked(loadBookings())
@@ -166,7 +183,15 @@ export default function ContactPage() {
   }
   const goBack = () => setStep((s) => (s > 1 ? s - 1 : s))
 
-  const submit = () => {
+  /**
+   * Sends the booking to Formspree, then confirms.
+   *
+   * The order matters: before this existed the form showed "APPOINTMENT
+   * CONFIRMED" purely from local state, so a customer was told their slot was
+   * booked while the request never left the browser. Nothing is confirmed and
+   * no slot is reserved until Formspree has accepted the submission.
+   */
+  const submit = async () => {
     const result = bookingSchema.safeParse(form)
     if (!result.success) {
       const next: FieldErrors = {}
@@ -176,9 +201,45 @@ export default function ContactPage() {
       setErrors(next)
       return
     }
-    saveBooking(result.data.date, result.data.time)
+
+    setSending(true)
+    setSendError(null)
+
+    const booking = result.data
+    const outcome = await sendBooking({
+      // Formspree renders these keys as the labels in the notification email,
+      // so they are written for whoever reads it at the shop, not for code.
+      _subject: `New booking — ${serviceLabelFor(booking)}, ${booking.name}, ${formatDate(booking.date)} ${formatTime(booking.time)}`,
+      // Formspree uses a field named "email" to set the reply-to, so a reply
+      // goes to the customer instead of nowhere.
+      email: booking.email || '',
+      Name: booking.name,
+      Phone: booking.phone,
+      'Email address': booking.email || 'Not provided',
+      Service: serviceLabelFor(booking),
+      Vehicle: `${booking.vehicleYear} ${booking.vehicleMake} ${booking.vehicleModel}`,
+      'License plate': booking.licensePlate || 'Not provided',
+      'Drop off': `${formatDate(booking.date)} at ${formatTime(booking.time)}`,
+      Notes: booking.notes || 'None',
+      // Spam trap. Formspree discards any submission where this is filled;
+      // a human never sees the field.
+      _gotcha: honeypot,
+    })
+
+    setSending(false)
+
+    if (outcome.kind === 'error') {
+      const [first] = outcome.getFormErrors()
+      setSendError(
+        first?.message ??
+          'We could not send your request just now. Please check your connection and try again, or call the shop.',
+      )
+      return
+    }
+
+    saveBooking(booking.date, booking.time)
     setBooked(loadBookings())
-    setConfirmed(result.data)
+    setConfirmed(booking)
     setStep(5)
   }
 
@@ -186,6 +247,8 @@ export default function ContactPage() {
     setForm({})
     setErrors({})
     setConfirmed(null)
+    setSendError(null)
+    setHoneypot('')
     setStep(1)
   }
 
@@ -311,21 +374,62 @@ export default function ContactPage() {
               {step === 4 && <StepReview form={form} />}
               {step === 5 && confirmed && <StepConfirmed booking={confirmed} onReset={reset} />}
               {step < 5 && (
-                <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6">
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    disabled={step === 1}
-                    className="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40 disabled:cursor-not-allowed disabled:opacity-30"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="submit"
-                    className="rounded-full bg-[#e6ff3d] px-8 py-3 text-sm font-bold text-black transition hover:bg-white"
-                  >
-                    {step < 4 ? 'Continue' : 'Book Appointment'}
-                  </button>
+                <div className="mt-8 border-t border-white/10 pt-6">
+                  {sendError && (
+                    <div
+                      role="alert"
+                      className="mb-5 rounded-2xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200"
+                    >
+                      <p className="font-semibold text-red-100">
+                        We could not send your request.
+                      </p>
+                      <p className="mt-1 leading-relaxed">{sendError}</p>
+                      <p className="mt-2 leading-relaxed">
+                        Your details are still filled in, so you can try again. If it
+                        keeps failing, call{' '}
+                        <a
+                          href={`tel:${business.phoneRaw}`}
+                          className="font-semibold text-[#e6ff3d] underline-offset-4 hover:underline"
+                        >
+                          {business.phoneDisplay}
+                        </a>{' '}
+                        and we will book you in over the phone.
+                      </p>
+                    </div>
+                  )}
+                  {/*
+                    Spam trap. Formspree discards any submission where _gotcha is
+                    filled. It is hidden from sight and from assistive tech, and
+                    taken out of the tab order, so only a bot ever fills it.
+                  */}
+                  <input
+                    type="text"
+                    name="_gotcha"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-[-9999px] h-px w-px opacity-0"
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={goBack}
+                      disabled={step === 1 || sending}
+                      className="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40 disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={sending}
+                      aria-busy={sending}
+                      className="rounded-full bg-[#e6ff3d] px-8 py-3 text-sm font-bold text-black transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {step < 4 ? 'Continue' : sending ? 'Sending…' : 'Book Appointment'}
+                    </button>
+                  </div>
                 </div>
               )}
             </form>
@@ -851,10 +955,7 @@ function StepDetails({ form, setField, errors, inputCls, labelCls }: StepFieldPr
 }
 
 function StepReview({ form }: { form: BookingForm }) {
-  const serviceLabel =
-    form.service === 'other'
-      ? `Other: ${form.otherService}`
-      : serviceOptions.find((option) => option.id === form.service)?.label || form.service
+  const serviceLabel = serviceLabelFor(form)
   return (
     <div>
       <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
@@ -893,10 +994,7 @@ function ReviewItem({ label, value, full }: { label: string; value?: string; ful
 }
 
 function StepConfirmed({ booking, onReset }: { booking: Booking; onReset: () => void }) {
-  const serviceLabel =
-    booking.service === 'other'
-      ? `Other: ${booking.otherService}`
-      : serviceOptions.find((option) => option.id === booking.service)?.label || booking.service
+  const serviceLabel = serviceLabelFor(booking)
   return (
     <div className="text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e6ff3d] text-3xl font-black text-black">

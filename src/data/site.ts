@@ -28,6 +28,17 @@ export const SITE_NAME = 'Sultan Motors'
 export const SITE_LOCALE = 'en_CA'
 export const SITE_LANG = 'en-CA'
 
+/**
+ * Formspree form id backing the booking form on /contact.
+ *
+ * Not a secret: it identifies a public submission endpoint, and is visible in
+ * the network request either way. Override per environment with
+ * VITE_FORMSPREE_FORM_ID when testing against a scratch form so real bookings
+ * are never mixed with test traffic.
+ */
+export const FORMSPREE_FORM_ID =
+  import.meta.env?.VITE_FORMSPREE_FORM_ID ?? 'xeaqzlgr'
+
 export const business = {
   name: 'Sultan Motors',
   legalName: 'Sultan Motors',
@@ -123,8 +134,8 @@ export const ogImageUrl = absoluteUrl(OG_IMAGE.path)
  * in the knowledge panel. It must be square and at least 112x112 — the 1200x630
  * social card is the wrong shape for this slot.
  *
- * This is currently the generated "SM" monogram. Replace public/icon-512.png
- * with the shop's real logo when one is available.
+ * This is currently the generated "S" mark from scripts/optimize_images.py.
+ * Replace public/icon-512.png with the shop's real logo when one is available.
  */
 export const logoUrl = absoluteUrl('/icon-512.png')
 
