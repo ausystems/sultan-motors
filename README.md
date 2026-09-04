@@ -28,9 +28,11 @@ Two values in `src/data/site.ts` are placeholders that need confirming:
 - `socialProfiles` — all empty. Filling one in both links it in the header and
   footer and adds it to the `sameAs` array in structured data. Empty entries are
   filtered out, so nothing ships as a dead link.
-- `public/icon-512.png` — a generated "SM" monogram standing in for the real
-  logo. It is what the `logo` property in structured data points at, so replace
-  it with the shop's actual mark (square, at least 112×112) when one exists.
+- `public/icon-512.png` — a generated "S" mark standing in for the real logo.
+  It is what the `logo` property in structured data points at, so replace it
+  with the shop's actual mark (square, at least 112×112) when one exists. Every
+  icon is built from one source by `npm run images`, so regenerate the set
+  rather than swapping a single file.
 
 No `aggregateRating` or `review` markup is emitted. Review structured data must
 describe reviews that genuinely exist and are visible on the page; inventing it
@@ -65,22 +67,14 @@ submissions.
 
 ## Deploying
 
-The repository is committed and ready to push. Both steps below need an
-interactive login, so they have to be run by someone with access to the
-accounts.
+### 1. GitHub
 
-### 1. Push to GitHub
+The repository lives at `ausystems/sultan-motors` (private) and `origin` is
+already configured, so ordinary `git push` works.
 
-Create an empty repository (no README, no .gitignore — this repo already has
-both), then:
-
-```bash
-git remote add origin git@github.com:<you>/sultan-motors.git
-git push -u origin main
-```
-
-If you use the GitHub CLI, `gh repo create sultan-motors --private --source=. --push`
-does both in one step after `gh auth login`.
+Note that the stored credential lacks the `workflow` scope: pushing a change to
+`.github/workflows/` is rejected with a scope error while every other path
+pushes fine. Add the scope to the token, or edit that file through GitHub.
 
 ### 2. Deploy to Vercel
 
