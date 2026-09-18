@@ -34,9 +34,24 @@ WEBP_QUALITY = 80
 MIN_SAVING = 0.12
 
 HERO_SRC = ASSETS / "sultan-motors-brampton-auto-repair-shop.webp"
-HERO_WIDTHS = (960, 1600, 2400)
-# 16:9 crop, matching the hero's object-cover framing.
+# Landscape variants for wide viewports. 3200 exists for retina desktops: a
+# 2400px frame covering a 1988px-tall retina viewport is upscaled 1.5x, and
+# licence-plate text is the first thing to go soft.
+HERO_WIDTHS = (960, 1600, 2400, 3200)
+# 16:9 crop, matching the hero's object-cover framing on wide screens.
 HERO_RATIO = 9 / 16
+# Portrait variants for phones. The hero is a tall box on a phone, so a
+# landscape frame is stretched ~3x to cover it; a 3:4 crop taken from the
+# full-resolution source at the cars keeps every pixel native instead.
+# 1620 is the full-height crop at the source's native resolution: the largest
+# portrait that adds real pixels rather than interpolated ones.
+HERO_PORTRAIT_WIDTHS = (900, 1440, 1620)
+HERO_PORTRAIT_RATIO = 4 / 3
+# Horizontal centre of the portrait crop, as a share of the source width. The
+# two vehicles sit centre-right of the frame.
+HERO_PORTRAIT_FOCUS = 0.60
+# Plate text and grille detail survive at 84 where 80 starts to smear them.
+HERO_QUALITY = 84
 
 BRAND_YELLOW = (230, 255, 61)
 FONT_BOLD = "/System/Library/Fonts/HelveticaNeue.ttc"
@@ -84,7 +99,20 @@ def build_hero_variants() -> None:
             frame = src.crop((left, 0, left + crop_w, h))
 
         frame.resize((width, height), Image.LANCZOS).save(
-            out, "WEBP", quality=WEBP_QUALITY, method=6
+            out, "WEBP", quality=HERO_QUALITY, method=6
+        )
+        print(f"  {out.name:<58} {width}x{height}  {kb(out.stat().st_size)}")
+
+    # Portrait crops: full source height, a 3:4 window centred on the vehicles.
+    w, h = src.size
+    crop_w = round(h / HERO_PORTRAIT_RATIO)
+    left = min(max(round(w * HERO_PORTRAIT_FOCUS - crop_w / 2), 0), w - crop_w)
+    portrait = src.crop((left, 0, left + crop_w, h))
+    for width in HERO_PORTRAIT_WIDTHS:
+        height = round(width * HERO_PORTRAIT_RATIO)
+        out = ASSETS / f"{HERO_SRC.stem}-portrait-{width}.webp"
+        portrait.resize((width, height), Image.LANCZOS).save(
+            out, "WEBP", quality=HERO_QUALITY, method=6
         )
         print(f"  {out.name:<58} {width}x{height}  {kb(out.stat().st_size)}")
 

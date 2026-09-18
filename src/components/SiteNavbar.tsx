@@ -17,8 +17,9 @@ const primaryLinks = [
  * A persistent bar that stays out of the way, and a full-screen index when
  * asked for.
  *
- * The bar is transparent over each page's dark opening and gains a tinted
- * backdrop once the visitor scrolls. The menu lists every route on the site
+ * The bar is transparent over each page's dark opening and gains a near-solid
+ * ink field once the visitor scrolls. It is a flat tint, not a backdrop blur:
+ * nothing on the site may blur a photograph, including one passing under it. The menu lists every route on the site
  * at once: three primary destinations and the twelve services, numbered, with
  * the hovered service's photograph shown alongside on wide screens. Escape
  * closes it, focus is returned to the button that opened it, and the page
@@ -113,9 +114,9 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
       <div className="h-16 md:h-[4.5rem]" aria-hidden="true" />
 
       <header
-        className={`fixed inset-x-0 top-0 z-50 text-paper transition-[background-color,backdrop-filter,box-shadow] duration-500 ${
+        className={`fixed inset-x-0 top-0 z-50 text-paper transition-[background-color,box-shadow] duration-500 ${
           scrolled && !open
-            ? 'bg-ink/80 shadow-[0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-md'
+            ? 'bg-ink/90 shadow-[0_1px_0_0_rgba(255,255,255,0.08)]'
             : 'bg-transparent'
         }`}
       >

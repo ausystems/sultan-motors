@@ -93,7 +93,9 @@ export default function AboutPage() {
                   data-hero-media
                   src={heroPhoto.src}
                   srcSet={heroPhoto.srcSet}
-                  sizes="100vw"
+                  // Height-aware: object-cover on a tall viewport is bound by
+                  // height, so ask for the width a 2:1 frame needs to cover it.
+                  sizes="max(100vw, 204vh)"
                   alt={heroPhoto.alt}
                   width={heroPhoto.width}
                   height={heroPhoto.height}

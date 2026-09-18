@@ -15,6 +15,10 @@ import { useMediaQuery } from '../motion/useMediaQuery'
 import heroShop from '../assets/sultan-motors-brampton-auto-repair-shop-1600.webp'
 import heroShop960 from '../assets/sultan-motors-brampton-auto-repair-shop-960.webp'
 import heroShop2400 from '../assets/sultan-motors-brampton-auto-repair-shop-2400.webp'
+import heroShop3200 from '../assets/sultan-motors-brampton-auto-repair-shop-3200.webp'
+import heroPortrait900 from '../assets/sultan-motors-brampton-auto-repair-shop-portrait-900.webp'
+import heroPortrait1440 from '../assets/sultan-motors-brampton-auto-repair-shop-portrait-1440.webp'
+import heroPortrait1620 from '../assets/sultan-motors-brampton-auto-repair-shop-portrait-1620.webp'
 
 /* One line per service, in the order of the site index. */
 const serviceLines: Record<string, string> = {
@@ -79,19 +83,36 @@ export default function HomePage() {
             className="relative flex min-h-[100svh] flex-col bg-ink text-paper"
           >
             <div className="absolute inset-0 overflow-hidden">
-              <img
-                data-hero-media
-                src={heroShop}
-                srcSet={`${heroShop960} 960w, ${heroShop} 1600w, ${heroShop2400} 2400w`}
-                sizes="100vw"
-                alt="Vehicles on the hoists inside the Sultan Motors repair bay in Brampton"
-                width={1600}
-                height={900}
-                loading="eager"
-                fetchPriority="high"
-                decoding="async"
-                className="h-full w-full object-cover object-center"
-              />
+              {/*
+                Art-directed sources. Phones get a 3:4 crop taken from the
+                full-resolution frame at the vehicles, so nothing is upscaled;
+                wide screens get the landscape frame. The landscape `sizes`
+                accounts for height as well as width: object-cover on a
+                viewport squarer than 16:9 is constrained by height, and
+                without the vh term the browser picks a frame too small to
+                cover it and stretches it, which is what softens plate text.
+              */}
+              <picture>
+                <source
+                  media="(max-width: 767px)"
+                  srcSet={`${heroPortrait900} 900w, ${heroPortrait1440} 1440w, ${heroPortrait1620} 1620w`}
+                  sizes="max(100vw, 75vh)"
+                  type="image/webp"
+                />
+                <img
+                  data-hero-media
+                  src={heroShop}
+                  srcSet={`${heroShop960} 960w, ${heroShop} 1600w, ${heroShop2400} 2400w, ${heroShop3200} 3200w`}
+                  sizes="max(100vw, 177.8vh)"
+                  alt="Vehicles on the hoists inside the Sultan Motors repair bay in Brampton"
+                  width={1600}
+                  height={900}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="h-full w-full object-cover object-center"
+                />
+              </picture>
               <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-ink/20" />
             </div>
 

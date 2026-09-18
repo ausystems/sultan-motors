@@ -107,11 +107,34 @@ export default function SiteFooter() {
         </div>
       </div>
 
+      {/*
+        The wordmark, set to the full width of the page and centred by
+        construction. An SVG scales the word exactly to the available width at
+        every viewport, which font-size in vw cannot do without guessing the
+        glyph widths. The viewBox is the measured ink width of "SULTAN" in
+        Geist 600 at 100px with this tracking (344 units), by 72 for the cap
+        height, so the letters sit on the footer's bottom edge.
+      */}
       <div className="select-none overflow-hidden" aria-hidden="true">
         <div className="wrap">
-          <div className="-mb-[0.19em] font-semibold leading-none tracking-[-0.05em] text-paper/[0.07] [font-size:clamp(5rem,19vw,17rem)]">
-            Sultan
-          </div>
+          <svg
+            viewBox="0 0 344 72"
+            width="100%"
+            preserveAspectRatio="xMidYMax meet"
+            className="-mb-[2px] block h-auto w-full fill-paper/[0.07]"
+          >
+            <text
+              x="172"
+              y="71"
+              textAnchor="middle"
+              fontFamily="'Geist Variable', ui-sans-serif, system-ui, sans-serif"
+              fontWeight="600"
+              fontSize="100"
+              letterSpacing="-5"
+            >
+              SULTAN
+            </text>
+          </svg>
         </div>
       </div>
     </footer>
