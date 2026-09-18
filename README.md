@@ -115,6 +115,23 @@ that call, and restraint was the right one here.
 - Touch targets are at least 44px, the smallest text is 12px, the document
   language is `en-CA` to match the declared locale, and fixed chrome honours a
   phone's safe area when the site is installed to the home screen.
+- **The homepage hero has two preloads, one per art-directed source**, written
+  into `<head>` by the server entry from `src/data/heroImages.ts`. They are not
+  `<link>` elements in JSX: React does not hoist a link without an `href`, and
+  moving one out of the section after render leaves the client expecting an
+  element that is no longer there, which is a hydration mismatch and a full
+  client re-render. A phone fetches exactly one hero frame.
+- **Entrances never hide content a visitor can already see.** `entranceAllowed`
+  in `src/motion/gsap.ts` skips the hero entrance when the page loaded out of
+  sight (a tab opened from a long-press) or when JavaScript arrived long after
+  first paint on a slow connection, and `useReveal` leaves anything already in
+  the viewport exactly as the server rendered it. Both the hero entrance and
+  the page-leave transition are backed by native timers, so a stalled frame
+  loop can neither blank the hero nor strand a tap on a link.
+- Hover styles are gated to `@media (hover: hover)` so a tapped button does not
+  stick in its hover colour on a touchscreen; `touch-action: manipulation`
+  removes the double-tap delay on controls; `text-size-adjust: 100%` stops iOS
+  inflating text on rotation.
 
 ### Decisions worth knowing
 

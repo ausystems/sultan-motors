@@ -21,6 +21,7 @@ import { buildHead, renderHeadHtml } from './data/head'
 import { pageSeo, notFoundSeo, indexableRoutes } from './data/seo'
 import { SITE_URL, SITE_NAME, SITE_NOINDEX, absoluteUrl } from './data/site'
 import type { SeoProps } from './components/Seo'
+import { heroPreloadHtml } from './data/heroImages'
 
 export interface RenderedRoute {
   /** Site-relative path, e.g. "/brake-repair-brampton". */
@@ -54,23 +55,34 @@ function outputFile(path: string): string {
 }
 
 /**
- * React emits hoistable resources, notably the `<link rel="preload">` for an
- * image marked fetchPriority="high", at the front of renderToString's output.
- * Left there they land inside <div id="root">, after the stylesheet, so the
- * preload for the LCP image is discovered late and does nothing useful.
- * Splitting them out lets the prerenderer put them in <head> where they belong.
+ * Moves every `<link rel="preload">` in the rendered markup into <head>.
+ *
+ * Two sources put them in the body. React emits the preload it derives from a
+ * bare `<img fetchPriority="high">` at the front of renderToString's output,
+ * which lands inside <div id="root">. And a `<link>` written directly in JSX
+ * without an href, such as the media-split image preloads on the homepage, is
+ * not treated as a resource by React at all and stays wherever it was
+ * rendered. In either place the preload is found after the stylesheet, one
+ * round trip late for the image it exists to speed up.
  */
-function splitHoistables(html: string): { hoisted: string; body: string } {
-  const match = html.match(/^(?:\s*<link\b[^>]*>)+/i)
-  if (!match) return { hoisted: '', body: html }
+const PRELOAD = /<link\b[^>]*\brel="(?:preload|modulepreload)"[^>]*>/gi
+
+function hoistPreloads(html: string): { hoisted: string; body: string } {
+  const links = html.match(PRELOAD) ?? []
+  if (!links.length) return { hoisted: '', body: html }
   return {
-    // React writes these React-style; lowercase them so the markup validates.
-    hoisted: match[0]
-      .replace(/\bimageSrcSet=/g, 'imagesrcset=')
-      .replace(/\bimageSizes=/g, 'imagesizes=')
-      .replace(/\bfetchPriority=/g, 'fetchpriority=')
-      .trim(),
-    body: html.slice(match[0].length),
+    // React writes these attributes React-style; lowercase them so the
+    // markup validates and older parsers match them.
+    hoisted: [...new Set(links)]
+      .map((tag) =>
+        tag
+          .replace(/\bimageSrcSet=/g, 'imagesrcset=')
+          .replace(/\bimageSizes=/g, 'imagesizes=')
+          .replace(/\bfetchPriority=/g, 'fetchpriority=')
+          .replace(/\bcrossOrigin=/g, 'crossorigin='),
+      )
+      .join('\n    '),
+    body: html.replace(PRELOAD, ''),
   }
 }
 
@@ -83,13 +95,16 @@ export function renderRoute(path: string): RenderedRoute {
       </StaticRouter>
     </StrictMode>,
   )
-  const { hoisted, body } = splitHoistables(rendered)
+  const { hoisted, body } = hoistPreloads(rendered)
+  // The homepage hero's media-split preloads are written here, outside the
+  // React tree, so the client and server trees stay identical.
+  const extras = [hoisted, path === '/' ? heroPreloadHtml() : ''].filter(Boolean)
   const head = renderHeadHtml(buildHead(seo))
 
   return {
     path,
     file: outputFile(path),
-    head: hoisted ? `${head}\n    ${hoisted}` : head,
+    head: extras.length ? `${head}\n    ${extras.join('\n    ')}` : head,
     html: body,
   }
 }

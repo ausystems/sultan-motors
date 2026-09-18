@@ -121,7 +121,7 @@ export default function SiteFooter() {
             viewBox="0 0 344 72"
             width="100%"
             preserveAspectRatio="xMidYMax meet"
-            className="-mb-[2px] block h-auto w-full fill-paper/[0.07]"
+            className="block h-auto w-full fill-paper/[0.07]"
           >
             <text
               x="172"

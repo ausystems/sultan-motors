@@ -13,13 +13,7 @@ import { business, openingHours } from '../data/site'
 import { useHeroReveal } from '../motion/useHeroReveal'
 import { useReveal } from '../motion/useReveal'
 import { useMediaQuery } from '../motion/useMediaQuery'
-import heroShop from '../assets/sultan-motors-brampton-auto-repair-shop-1600.webp'
-import heroShop960 from '../assets/sultan-motors-brampton-auto-repair-shop-960.webp'
-import heroShop2400 from '../assets/sultan-motors-brampton-auto-repair-shop-2400.webp'
-import heroShop3200 from '../assets/sultan-motors-brampton-auto-repair-shop-3200.webp'
-import heroPortrait900 from '../assets/sultan-motors-brampton-auto-repair-shop-portrait-900.webp'
-import heroPortrait1440 from '../assets/sultan-motors-brampton-auto-repair-shop-portrait-1440.webp'
-import heroPortrait1620 from '../assets/sultan-motors-brampton-auto-repair-shop-portrait-1620.webp'
+import { heroImages } from '../data/heroImages'
 
 /* One line per service, in the order of the site index. */
 const serviceLines: Record<string, string> = {
@@ -112,19 +106,19 @@ export default function HomePage() {
               */}
               <picture>
                 <source
-                  media="(max-width: 767px)"
-                  srcSet={`${heroPortrait900} 900w, ${heroPortrait1440} 1440w, ${heroPortrait1620} 1620w`}
-                  sizes="max(100vw, 75vh)"
+                  media={heroImages.portrait.media}
+                  srcSet={heroImages.portrait.srcSet}
+                  sizes={heroImages.portrait.sizes}
                   type="image/webp"
                 />
                 <img
                   data-hero-media
-                  src={heroShop}
-                  srcSet={`${heroShop960} 960w, ${heroShop} 1600w, ${heroShop2400} 2400w, ${heroShop3200} 3200w`}
-                  sizes="max(100vw, 177.8vh)"
+                  src={heroImages.landscape.src}
+                  srcSet={heroImages.landscape.srcSet}
+                  sizes={heroImages.landscape.sizes}
                   alt="Vehicles on the hoists inside the Sultan Motors repair bay in Brampton"
-                  width={1600}
-                  height={900}
+                  width={heroImages.landscape.width}
+                  height={heroImages.landscape.height}
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
@@ -132,14 +126,20 @@ export default function HomePage() {
                 />
               </picture>
               <div className="absolute inset-0 bg-ink/45" />
-              <div className="absolute inset-0 bg-gradient-to-r from-ink/65 via-ink/30 to-ink/10" />
+              {/*
+                On a phone the type spans the whole width, so the left-weighted
+                wash that suits a wide screen leaves the right half of the
+                headline over the brightest part of the photograph. A heavier,
+                even wash on small screens; the directional one from md up.
+              */}
+              <div className="absolute inset-0 bg-ink/25 md:bg-transparent md:bg-gradient-to-r md:from-ink/65 md:via-ink/30 md:to-ink/10" />
               <div className="absolute inset-0 bg-gradient-to-b from-ink/35 via-transparent to-ink/55" />
             </div>
 
             <SiteNavbar theme="dark" />
 
             <div className="wrap relative z-10 flex flex-1 flex-col justify-center pb-[8vh] pt-4">
-              <p data-hero-rest className="t-index text-paper/80">
+              <p data-hero-rest className="t-index max-w-[30ch] text-paper/80 [text-wrap:balance]">
                 The craft and precision behind Sultan Motors
               </p>
               <h1 data-hero-title className="t-hero mt-7 max-w-[18ch] md:mt-9">

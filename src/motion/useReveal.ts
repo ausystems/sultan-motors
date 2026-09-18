@@ -25,8 +25,14 @@ export function useReveal<T extends HTMLElement>(scope: RefObject<T | null>) {
     if (!root || reducedMotion()) return
     const gsap = ensureGsap()
 
+    // Anything already inside the viewport when this runs is content the
+    // visitor can see. It is left exactly as the server rendered it; only
+    // elements still below the fold get an entrance, as they scroll in.
+    const fold = window.innerHeight * 0.88
+
     const ctx = gsap.context(() => {
       root.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+        if (el.getBoundingClientRect().top < fold) return
         const kind = el.dataset.reveal || 'rise'
         const delay = Number(el.dataset.revealDelay || 0)
         const targets = el.hasAttribute('data-reveal-group')

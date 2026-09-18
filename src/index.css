@@ -101,6 +101,9 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    /* iOS inflates text on rotation to landscape; the fluid scale already handles it. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -134,8 +137,13 @@
   }
 
   a,
-  button {
+  button,
+  input,
+  textarea,
+  select {
     -webkit-tap-highlight-color: transparent;
+    /* Disables double-tap zoom on controls so a tap fires immediately. */
+    touch-action: manipulation;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -295,10 +303,14 @@
     padding-bottom: 2px;
     transition: background-size 0.45s var(--ease-out-expo);
   }
-  .link-ul:hover,
-  .link-ul:focus-visible,
-  .group:hover .link-ul {
+  .link-ul:focus-visible {
     background-size: 100% 1px;
+  }
+  @media (hover: hover) {
+    .link-ul:hover,
+    .group:hover .link-ul {
+      background-size: 100% 1px;
+    }
   }
 
   /*
@@ -331,37 +343,47 @@
     background-color: var(--color-accent);
     color: var(--color-ink);
   }
-  .btn-accent:hover {
-    background-color: var(--color-paper);
+  @media (hover: hover) {
+    .btn-accent:hover {
+      background-color: var(--color-paper);
+    }
   }
   .btn-ink {
     background-color: var(--color-ink);
     color: var(--color-paper);
   }
-  .btn-ink:hover {
-    background-color: var(--color-ink-4);
+  @media (hover: hover) {
+    .btn-ink:hover {
+      background-color: var(--color-ink-4);
+    }
   }
   .btn-ghost {
     border: 1px solid color-mix(in srgb, var(--color-ink) 22%, transparent);
     color: var(--color-ink);
   }
-  .btn-ghost:hover {
-    border-color: var(--color-ink);
+  @media (hover: hover) {
+    .btn-ghost:hover {
+      border-color: var(--color-ink);
+    }
   }
   .btn-ghost-dark {
     border: 1px solid color-mix(in srgb, var(--color-paper) 24%, transparent);
     color: var(--color-paper);
   }
-  .btn-ghost-dark:hover {
-    border-color: var(--color-paper);
+  @media (hover: hover) {
+    .btn-ghost-dark:hover {
+      border-color: var(--color-paper);
+    }
   }
 
   /* The arrow that follows a CTA label. It travels 4px on hover, nothing more. */
   .btn .arrow {
     transition: transform 0.35s var(--ease-out-expo);
   }
-  .btn:hover .arrow {
-    transform: translate(3px, -3px);
+  @media (hover: hover) {
+    .btn:hover .arrow {
+      transform: translate(3px, -3px);
+    }
   }
 
   /*

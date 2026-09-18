@@ -45,3 +45,31 @@ export const dur = {
 } as const
 
 export { gsap, ScrollTrigger, SplitText }
+
+let firstMountDone = false
+
+/**
+ * Whether an entrance animation should play for content that is on screen
+ * right now.
+ *
+ * On the initial page load the server-rendered markup is painted before any
+ * of this code runs. If it has been visible for a while (a slow connection,
+ * a slow phone), hiding it to play an entrance would yank text the visitor
+ * is already reading. So on the first mount the entrance plays only if we got
+ * here within a beat of first paint. Every later mount is a client-side
+ * navigation to a fresh page, where nothing has been seen yet, and the
+ * entrance always plays.
+ */
+export function entranceAllowed(): boolean {
+  if (firstMountDone) return true
+  firstMountDone = true
+  // A page loaded out of sight (a tab opened from a long-press, a background
+  // load) has no frame loop to animate with and nobody watching. Leave the
+  // server-rendered content exactly as it is; it will simply be there when
+  // the visitor switches to the tab.
+  if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return false
+  if (typeof performance === 'undefined') return true
+  const paint = performance.getEntriesByName('first-contentful-paint')[0]
+  const sincePaint = performance.now() - (paint ? paint.startTime : 0)
+  return sincePaint < 700
+}

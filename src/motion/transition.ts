@@ -18,12 +18,19 @@ export function leavePage(): Promise<void> {
 
   const gsap = ensureGsap()
   return new Promise((resolve) => {
+    // Navigation must never wait on the frame loop. If the tween has not
+    // reported completion within twice its duration, go anyway; the incoming
+    // page's entrance covers whatever the leave did not finish.
+    const guard = window.setTimeout(resolve, 400)
     gsap.to(main, {
       y: 10,
       opacity: 0,
       duration: 0.18,
       ease: ease.inOut,
-      onComplete: resolve,
+      onComplete: () => {
+        window.clearTimeout(guard)
+        resolve()
+      },
     })
   })
 }
