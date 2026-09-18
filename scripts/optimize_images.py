@@ -268,7 +268,7 @@ def build_service_cards() -> None:
 # App icons                                                                     #
 # --------------------------------------------------------------------------- #
 
-# The brand mark is a single "S" — the shop's initial — in near-black on the
+# The brand mark is a single "S": the shop's initial, in near-black on the
 # brand yellow, matching the site's primary CTA (yellow field, black text).
 #
 # One letter, not "SM": at 16x16 in a browser tab a two-letter monogram

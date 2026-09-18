@@ -25,7 +25,7 @@ export function SkipToContent() {
 /**
  * The page's main landmark. Every route wraps its content in this so assistive
  * technology and content-extraction tooling can identify the primary content
- * region — previously each page was `div` and `section` all the way down, with
+ * region, previously each page was `div` and `section` all the way down, with
  * no landmark at all.
  */
 export function Main({

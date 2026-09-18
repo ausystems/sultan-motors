@@ -3,8 +3,8 @@
  *
  * Without this step every URL served the same index.html: the same homepage
  * title, the same description, no canonical, and an empty <div id="root">.
- * Crawlers that do not execute JavaScript — and every social and messaging
- * link preview — saw nothing page-specific. Search engines that do render JS
+ * Crawlers that do not execute JavaScript, and every social and messaging
+ * link preview, saw nothing page-specific. Search engines that do render JS
  * still had to wait a full render pass to learn what the page was about.
  *
  * After this step each route ships its own title, description, canonical,
@@ -32,7 +32,7 @@ function fail(message) {
 }
 
 const template = await readFile(join(DIST, 'index.html'), 'utf8').catch(() =>
-  fail('dist/index.html not found — run `vite build` first'),
+  fail('dist/index.html not found, run `vite build` first'),
 )
 
 if (!template.includes(HEAD_OPEN) || !template.includes(HEAD_CLOSE)) {

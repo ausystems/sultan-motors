@@ -16,19 +16,19 @@ VITE_SITE_URL=https://www.your-real-domain.ca
 ```
 
 If that value is wrong, the whole site tells search engines its content belongs
-to a domain you do not control. Everything else in `src/data/site.ts` — phone,
-address, hours, coordinates, social profiles — should be checked against the
+to a domain you do not control. Everything else in `src/data/site.ts`, phone,
+address, hours, coordinates, social profiles, should be checked against the
 Google Business Profile listing at the same time. The name, address, and phone
 must match that listing character for character.
 
 Two values in `src/data/site.ts` are placeholders that need confirming:
 
-- `business.latitude` / `business.longitude` — approximate. Google cross-checks
+- `business.latitude` / `business.longitude`, approximate. Google cross-checks
   these against the Business Profile pin.
-- `socialProfiles` — all empty. Filling one in both links it in the header and
+- `socialProfiles`: all empty. Filling one in both links it in the header and
   footer and adds it to the `sameAs` array in structured data. Empty entries are
   filtered out, so nothing ships as a dead link.
-- `public/icon-512.png` — a generated "S" mark standing in for the real logo.
+- `public/icon-512.png`: a generated "S" mark standing in for the real logo.
   It is what the `logo` property in structured data points at, so replace it
   with the shop's actual mark (square, at least 112×112) when one exists. Every
   icon is built from one source by `npm run images`, so regenerate the set
@@ -38,11 +38,78 @@ No `aggregateRating` or `review` markup is emitted. Review structured data must
 describe reviews that genuinely exist and are visible on the page; inventing it
 is a manual-action risk. Wire it to real Google reviews before adding any.
 
+## Design system
+
+The site is set in one typeface, three surfaces and one accent, on a
+twelve-column grid. Consistency comes from those, not from repeating a
+component: each page is composed for its content, so the homepage is
+cinematic, the service pages editorial, the booking page structured, and the
+404 typographic.
+
+### Typography
+
+[Geist](https://vercel.com/font) (OFL 1.1), self-hosted as a single variable
+file at `public/fonts/geist-variable.woff2` and preloaded from `index.html`.
+It carries the neo-grotesque character the identity calls for without the
+licensing problems of the proprietary references, and one file covers every
+weight the site uses.
+
+The scale lives in `src/index.css` as fluid `clamp()` steps and is exposed as
+utilities: `t-display`, `t-h1`, `t-h2`, `t-h3`, `t-lead`, `t-body`, `t-small`.
+Headlines are sentence case. Uppercase is reserved for `t-index`: tiny numerals
+and index labels, used sparingly and never as a habitual label above a heading.
+
+### Surfaces and colour
+
+Verified from the existing build rather than invented: a near-black scale
+(`ink`, `ink-2`, `ink-3`, `ink-4`), a white scale (`paper`, `paper-2`,
+`paper-3`) and the one brand accent, `#e6ff3d`. The accent appears on the
+primary action, focus rings, the active booking step and small marks, and
+nowhere else. There is no red in the identity.
+
+### Layout
+
+`wrap` sets the page gutter and maximum measure; `grid-12` is the column grid;
+`section-y` and `section-y-sm` are the two vertical rhythms. Hierarchy comes
+from scale, numbering and hairline rules (`rule`, `rule-dark`), not boxes:
+nothing on the site is a card.
+
+### Motion
+
+GSAP, in `src/motion/`, with a deliberately small vocabulary: two easings,
+three durations. Every animation is a `from`, so the server-rendered markup is
+the final state and nothing is hidden from a crawler or a visitor without
+JavaScript. `prefers-reduced-motion` disables all of it.
+
+- `useHeroReveal`: the above-the-fold entrance. The headline is split into
+  lines client-side (SplitText, which mirrors the text for assistive tech) and
+  each line rises out of its own mask.
+- `useReveal`: scroll-linked entrances for anything marked `data-reveal`,
+  with `image` and `line` variants and `data-reveal-group` for staggers.
+- `transition.ts`: the page-to-page gesture. A plain click runs a 180ms leave
+  before the route changes; back and forward are left to the browser.
+
+Three.js was considered and left out. A WebGL displacement on the photographs
+would cost roughly 150 KB of script and real GPU time on phones for an effect
+that a still photograph under the type does not need. The brief allows exactly
+that call, and restraint was the right one here.
+
+### Decisions worth knowing
+
+- **There is no hero video.** The original build never had one; the hero is a
+  photograph of the shop, and it stays the foundation of the opening. Nothing
+  was substituted.
+- The "15K vehicles serviced" and "100% certified" figures were removed. They
+  could not be verified and the site should not carry claims it cannot back.
+  "Since 2004" is grounded in the shop's founding year and stays.
+- The homepage capabilities marquee was removed as decoration.
+- No em dashes appear in copy, comments or this file.
+
 ## Booking form
 
 `/contact` posts to [Formspree](https://formspree.io). The form id lives in
 `src/data/site.ts` as `FORMSPREE_FORM_ID` and can be overridden per environment
-with `VITE_FORMSPREE_FORM_ID` — point that at a scratch form when testing so
+with `VITE_FORMSPREE_FORM_ID`, point that at a scratch form when testing so
 real bookings are never mixed with test traffic.
 
 The wizard validates with zod across its steps and submits a plain object
@@ -80,7 +147,7 @@ pushes fine. Add the scope to the token, or edit that file through GitHub.
 
 Import the repository at [vercel.com/new](https://vercel.com/new). `vercel.json`
 already sets the build command, output directory, headers, and redirects, so
-accept the defaults — do **not** let the dashboard override Framework Preset to
+accept the defaults, do **not** let the dashboard override Framework Preset to
 "Vite", which would replace the prerender build with a plain `vite build` and
 drop every prerendered route.
 
@@ -104,7 +171,7 @@ environment variable so the markup agrees with the domain:
 | `VITE_SITE_URL` | `https://www.your-domain.ca` | Production |
 
 Redeploy after setting it. Until you do, every canonical points at the
-`.vercel.app` domain — correct while that is the live URL, wrong the moment a
+`.vercel.app` domain, correct while that is the live URL, wrong the moment a
 custom domain becomes primary.
 
 ### 4. Verify the deployment
@@ -127,7 +194,7 @@ curl -s  https://<your-domain>/sitemap.xml | head      # 15 URLs on the live hos
 The `/nope` check is the important one. If it returns 200, something added an
 SPA catch-all rewrite, and every bad URL on the site has become a soft 404.
 
-Then confirm a page ships its content without JavaScript — this is what the
+Then confirm a page ships its content without JavaScript, this is what the
 prerendering exists for:
 
 ```bash
@@ -141,7 +208,7 @@ Verify the property once the domain is live, then submit the sitemap.
 Prefer **DNS TXT verification** on the domain (not the URL prefix): it covers
 `http`, `https`, `www`, and the apex in one property, and it survives redeploys.
 If you must verify per-URL instead, either drop Google's HTML file into
-`public/` — anything there is copied to the site root verbatim — or add its
+`public/`, anything there is copied to the site root verbatim, or add its
 meta tag to `index.html` *outside* the `<!--seo-head-->` markers, since the
 prerenderer replaces everything between them on every build.
 
@@ -163,7 +230,7 @@ npm run serve     # serve dist/ with production semantics at http://localhost:41
 SPA fallback: it returns `dist/index.html` for every path it does not match as a
 file, so `/brake-repair-brampton` silently serves the *homepage's* HTML and lets
 the client re-render over it. Every route still looks correct in the browser,
-which makes it useless for checking prerendering — and it reports 200 for URLs
+which makes it useless for checking prerendering, and it reports 200 for URLs
 that should 404.
 
 `npm run serve` (`scripts/serve_dist.mjs`) does what a static host does: resolves
@@ -192,18 +259,18 @@ dimensions, a `<main>` landmark and skip link, labelled form controls, resource
 hints landing in `<head>`, dead links, cross-page title/description/H1
 uniqueness, duplicate alt text across different photos, and that `/404` is not
 a crawlable 200 route. It is not wired into `npm run build`, because the build
-runs on hosts that may not have Python — run `npm run verify` locally or in CI.
+runs on hosts that may not have Python, run `npm run verify` locally or in CI.
 
 ## How the build works
 
 `npm run build` runs four steps:
 
-1. `tsc -b` — typecheck.
-2. `vite build` — the client bundle, split into `react` / `router` / `zod` /
+1. `tsc -b`: typecheck.
+2. `vite build`: the client bundle, split into `react` / `router` / `zod` /
    app chunks so a copy edit does not invalidate the framework code in
    visitors' caches.
-3. `vite build --ssr src/entry-server.tsx` — a Node-loadable build of the app.
-4. `node scripts/prerender.mjs` — renders every route to static HTML.
+3. `vite build --ssr src/entry-server.tsx`: a Node-loadable build of the app.
+4. `node scripts/prerender.mjs`: renders every route to static HTML.
 
 Step 4 is what makes this site indexable. Before it existed, every URL served
 one `index.html` with the homepage's title, no canonical, and an empty
@@ -268,7 +335,7 @@ markup and the page can never disagree.
 
 `/dent-repair-brampton` is retired and 301s to `/auto-body-repair-brampton`,
 which carries the dent-repair content. A 301 has to land on the closest
-equivalent page — pointing it somewhere topically unrelated makes Google treat
+equivalent page, pointing it somewhere topically unrelated makes Google treat
 it as a soft 404 and discard the old URL's accumulated signals.
 
 The 404 is emitted only as `dist/404.html`, never as `dist/404/index.html`. The
@@ -319,7 +386,7 @@ src/
     ServicePage.tsx  # shared service-page template
     NotFoundPage.tsx # 404
   data/
-    site.ts          # domain, NAP, hours, schema entities — the single source of truth
+    site.ts          # domain, NAP, hours, schema entities, the single source of truth
     head.ts          # builds the head model shared by Seo.tsx and the prerenderer
     seo.ts           # per-page titles, descriptions, breadcrumbs, JSON-LD graphs
     services.ts      # content for the 12 service pages
@@ -346,13 +413,13 @@ scripts/
 - The decorative backdrop behind service-page hero copy (`backgroundImageSet`
   in `SitePhoto.tsx`) deliberately serves the small variant at every pixel
   density. It renders at 30–40% opacity under a gradient, so the retina source
-  was spending 304 KB per page on detail nobody can see — and CSS backgrounds
+  was spending 304 KB per page on detail nobody can see, and CSS backgrounds
   are discovered late, so those bytes landed at the worst possible moment.
 
   Known consequence: the 2000px variants of the twelve service heroes are still
   emitted into `dist/` (about 2.4 MB) even though no browser now requests them.
   That is deploy weight only, not a user-facing cost. Clearing it means dropping
-  those sources from `src/data/photos.ts`, which is generated — so it belongs in
+  those sources from `src/data/photos.ts`, which is generated, so it belongs in
   the generator, not a hand edit.
 
 - Each service page ships its own 1200×630 social card in `public/og/`, built

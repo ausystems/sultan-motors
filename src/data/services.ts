@@ -106,7 +106,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "auto-repair-brampton",
     "eyebrow": "AUTO REPAIR BRAMPTON",
-    "h1": "AUTO REPAIR BRAMPTON TRUSTED BY LOCAL DRIVERS.",
+    "h1": "Auto repair in Brampton, trusted by local drivers.",
     "heroSubtitle": "Serving Brampton drivers from our automotive repair facility at 5 Melanie Dr, Sultan Motors delivers precise diagnostics, mechanical repairs, maintenance, and collision support with a 20 year track record.",
     "heroImageAlt": "Sultan Motors auto repair shop in Brampton Ontario",
     "intro": {
@@ -243,13 +243,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Inside the Brampton bay.",
       "images": [
         {
-          "caption": "REPAIR BAY"
+          "caption": "Repair bay"
         },
         {
-          "caption": "DIAGNOSTICS"
+          "caption": "Diagnostics"
         },
         {
-          "caption": "PRECISION TOOLS"
+          "caption": "Precision tools"
         }
       ]
     },
@@ -302,7 +302,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "car-diagnostics-brampton",
     "eyebrow": "CAR DIAGNOSTICS BRAMPTON",
-    "h1": "CAR DIAGNOSTICS BRAMPTON FOR ACCURATE VEHICLE REPAIRS.",
+    "h1": "Car diagnostics in Brampton for accurate repairs.",
     "heroSubtitle": "Sultan Motors uses professional grade scan tools and manufacturer data to trace check engine lights, electrical faults, and drivability problems on every make and model in Brampton.",
     "heroImageAlt": "Car diagnostics being performed at Sultan Motors Brampton",
     "intro": {
@@ -400,13 +400,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Diagnostic work at Sultan Motors.",
       "images": [
         {
-          "caption": "OBD SCAN"
+          "caption": "Obd scan"
         },
         {
-          "caption": "LIVE DATA"
+          "caption": "Live data"
         },
         {
-          "caption": "TEST BAY"
+          "caption": "Test bay"
         }
       ]
     },
@@ -450,7 +450,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "engine-repair-brampton",
     "eyebrow": "ENGINE REPAIR BRAMPTON",
-    "h1": "ENGINE REPAIR BRAMPTON BY EXPERIENCED MECHANICS.",
+    "h1": "Engine repair in Brampton by experienced mechanics.",
     "heroSubtitle": "Sultan Motors handles engine diagnostics, mechanical repairs, timing work, and complete engine replacement for Brampton drivers who need honest expert answers.",
     "heroImageAlt": "Engine repair in progress at Sultan Motors Brampton",
     "intro": {
@@ -556,13 +556,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Engine work at Sultan Motors.",
       "images": [
         {
-          "caption": "ENGINE BAY"
+          "caption": "Engine bay"
         },
         {
-          "caption": "PRECISION TORQUE"
+          "caption": "Precision torque"
         },
         {
-          "caption": "REPAIR BAY"
+          "caption": "Repair bay"
         }
       ]
     },
@@ -606,7 +606,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "brake-repair-brampton",
     "eyebrow": "BRAKE REPAIR BRAMPTON",
-    "h1": "BRAKE REPAIR BRAMPTON YOU CAN STOP ON.",
+    "h1": "Brake repair in Brampton you can stop on.",
     "heroSubtitle": "Sultan Motors delivers full brake repair in Brampton including inspections, pad and rotor replacement, calipers, brake fluid service, and complete brake system overhauls.",
     "heroImageAlt": "Brake repair being performed at Sultan Motors Brampton",
     "intro": {
@@ -708,13 +708,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Brake work at Sultan Motors.",
       "images": [
         {
-          "caption": "PADS AND ROTORS"
+          "caption": "Pads and rotors"
         },
         {
-          "caption": "PRECISION"
+          "caption": "Precision"
         },
         {
-          "caption": "BAY"
+          "caption": "Bay"
         }
       ]
     },
@@ -758,7 +758,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "car-maintenance-brampton",
     "eyebrow": "CAR MAINTENANCE BRAMPTON",
-    "h1": "CAR MAINTENANCE BRAMPTON THAT PROTECTS YOUR INVESTMENT.",
+    "h1": "Car maintenance in Brampton that protects your investment.",
     "heroSubtitle": "Sultan Motors delivers scheduled maintenance, oil services, fluid checks, and tune ups that follow every manufacturer schedule for cars, SUVs, and trucks in Brampton.",
     "heroImageAlt": "Car maintenance Brampton at Sultan Motors",
     "intro": {
@@ -847,13 +847,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Maintenance at Sultan Motors.",
       "images": [
         {
-          "caption": "MAINTENANCE BAY"
+          "caption": "Maintenance bay"
         },
         {
-          "caption": "PRECISION"
+          "caption": "Precision"
         },
         {
-          "caption": "INSPECTION"
+          "caption": "Inspection"
         }
       ]
     },
@@ -897,7 +897,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "transmission-repair-brampton",
     "eyebrow": "TRANSMISSION REPAIR BRAMPTON",
-    "h1": "TRANSMISSION REPAIR BRAMPTON DONE PROPERLY.",
+    "h1": "Transmission repair in Brampton, done properly.",
     "heroSubtitle": "Sultan Motors diagnoses and repairs automatic, manual, CVT, and dual clutch transmissions with the equipment, training, and honesty Brampton drivers deserve.",
     "heroImageAlt": "Transmission repair Brampton at Sultan Motors",
     "intro": {
@@ -986,13 +986,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Transmission work.",
       "images": [
         {
-          "caption": "REPAIR BAY"
+          "caption": "Repair bay"
         },
         {
-          "caption": "DIAGNOSTICS"
+          "caption": "Diagnostics"
         },
         {
-          "caption": "WORKSHOP"
+          "caption": "Workshop"
         }
       ]
     },
@@ -1036,7 +1036,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "suspension-repair-brampton",
     "eyebrow": "SUSPENSION REPAIR BRAMPTON",
-    "h1": "SUSPENSION REPAIR BRAMPTON THAT RESTORES THE RIDE.",
+    "h1": "Suspension repair in Brampton that restores the ride.",
     "heroSubtitle": "Sultan Motors handles shocks, struts, control arms, sway bars, ball joints, and steering components for Brampton drivers who want their vehicle to feel new again.",
     "heroImageAlt": "Suspension repair Brampton at Sultan Motors",
     "intro": {
@@ -1125,13 +1125,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Suspension work at Sultan Motors.",
       "images": [
         {
-          "caption": "SUSPENSION"
+          "caption": "Suspension"
         },
         {
-          "caption": "PRECISION"
+          "caption": "Precision"
         },
         {
-          "caption": "WORKSHOP"
+          "caption": "Workshop"
         }
       ]
     },
@@ -1175,7 +1175,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "auto-electrical-repair-brampton",
     "eyebrow": "AUTO ELECTRICAL REPAIR BRAMPTON",
-    "h1": "AUTO ELECTRICAL REPAIR BRAMPTON YOU CAN TRUST.",
+    "h1": "Auto electrical repair in Brampton you can trust.",
     "heroSubtitle": "Sultan Motors handles batteries, alternators, starters, wiring faults, sensor failures, and full electrical diagnostics for every vehicle in Brampton.",
     "heroImageAlt": "Auto electrical repair Brampton at Sultan Motors",
     "intro": {
@@ -1264,13 +1264,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Electrical work at Sultan Motors.",
       "images": [
         {
-          "caption": "DIAGNOSTICS"
+          "caption": "Diagnostics"
         },
         {
-          "caption": "TESTING"
+          "caption": "Testing"
         },
         {
-          "caption": "WORKSHOP"
+          "caption": "Workshop"
         }
       ]
     },
@@ -1314,7 +1314,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "collision-repair-brampton",
     "eyebrow": "COLLISION REPAIR BRAMPTON",
-    "h1": "COLLISION REPAIR BRAMPTON THAT LOOKS FACTORY NEW.",
+    "h1": "Collision repair in Brampton that looks factory new.",
     "heroSubtitle": "Sultan Motors handles accident repair, structural work, frame straightening, panel replacement, and full paint refinishing with insurance friendly estimates.",
     "heroImageAlt": "Collision repair Brampton at Sultan Motors",
     "intro": {
@@ -1404,13 +1404,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "subheading": "Before and after work performed by the Sultan Motors body shop team in Brampton.",
       "images": [
         {
-          "caption": "STRUCTURAL"
+          "caption": "Structural"
         },
         {
-          "caption": "PAINT BOOTH"
+          "caption": "Paint booth"
         },
         {
-          "caption": "FINAL DETAIL"
+          "caption": "Final detail"
         }
       ]
     },
@@ -1454,7 +1454,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "auto-body-repair-brampton",
     "eyebrow": "AUTO BODY REPAIR BRAMPTON",
-    "h1": "AUTO BODY REPAIR BRAMPTON WITH A SHOWROOM FINISH.",
+    "h1": "Auto body repair in Brampton with a showroom finish.",
     "heroSubtitle": "Sultan Motors delivers dent repair, panel work, paint correction, and full body restoration for Brampton drivers who want their vehicle looking its best.",
     "heroImageAlt": "Auto body repair Brampton at Sultan Motors",
     "intro": {
@@ -1544,13 +1544,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "subheading": "Real repairs and refinishes from the Sultan Motors body shop in Brampton.",
       "images": [
         {
-          "caption": "PANEL WORK"
+          "caption": "Panel work"
         },
         {
-          "caption": "PAINT"
+          "caption": "Paint"
         },
         {
-          "caption": "FINAL FINISH"
+          "caption": "Final finish"
         }
       ]
     },
@@ -1594,7 +1594,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
     "slug": "car-painting-brampton",
     "eyebrow": "CAR PAINTING BRAMPTON",
-    "h1": "CAR PAINTING BRAMPTON WITH A DEEP FACTORY FINISH.",
+    "h1": "Car painting in Brampton with a deep factory finish.",
     "heroSubtitle": "Sultan Motors delivers colour matched refinishing, scratch repair, full repaints, and clear coat restoration in a controlled paint booth environment in Brampton.",
     "heroImageAlt": "Car painting Brampton at Sultan Motors",
     "intro": {
@@ -1683,13 +1683,13 @@ export const serviceConfigs: ServiceConfig[] = [
       "heading": "Paint work at Sultan Motors.",
       "images": [
         {
-          "caption": "PAINT BOOTH"
+          "caption": "Paint booth"
         },
         {
-          "caption": "PREP"
+          "caption": "Prep"
         },
         {
-          "caption": "FINISH"
+          "caption": "Finish"
         }
       ]
     },
@@ -1733,7 +1733,7 @@ export const serviceConfigs: ServiceConfig[] = [
   {
       "slug": "safety-standards-certificate-brampton",
       "eyebrow": "SAFETY STANDARDS CERTIFICATE BRAMPTON",
-      "h1": "SAFETY STANDARDS CERTIFICATE BRAMPTON FOR A SMOOTH VEHICLE TRANSFER.",
+      "h1": "Safety Standards Certificate in Brampton for a smooth vehicle transfer.",
       "heroSubtitle": "Sultan Motors helps Brampton drivers get their vehicle inspected for an Ontario Safety Standards Certificate when buying, selling, transferring, importing, or registering a vehicle that requires a safety inspection.",
       "heroImageAlt": "Vehicle raised on a two-post hoist for a safety inspection at Sultan Motors in Brampton",
       "heroCta": "Book Your Safety Inspection",
@@ -1754,7 +1754,7 @@ export const serviceConfigs: ServiceConfig[] = [
         ]
       },
       "serviceCards": {
-        "heading": "COMPLETE SAFETY INSPECTION SUPPORT IN BRAMPTON.",
+        "heading": "Complete safety inspection support in Brampton.",
         "subheading": "Getting a vehicle safety approved is about more than simply checking a few items. Ontario's inspection standard covers the vehicle's safety related components and requires the vehicle to meet the applicable minimum standards at the time of inspection.",
         "cards": [
           {
@@ -1784,7 +1784,7 @@ export const serviceConfigs: ServiceConfig[] = [
         ]
       },
       "whyUs": {
-        "heading": "WHY BRAMPTON DRIVERS CHOOSE SULTAN MOTORS FOR SAFETY INSPECTIONS.",
+        "heading": "Why Brampton drivers choose Sultan Motors for safety inspections.",
         "points": [
           {
             "title": "Experienced technicians",
@@ -1810,7 +1810,7 @@ export const serviceConfigs: ServiceConfig[] = [
       },
       "whenYouNeed": {
         "eyebrow": "WHEN YOU NEED IT",
-        "heading": "WHEN DO YOU NEED A SAFETY STANDARDS CERTIFICATE IN ONTARIO?",
+        "heading": "When do you need a Safety Standards Certificate in Ontario?",
         "body": "A Safety Standards Certificate is commonly required when transferring a used vehicle to a new owner, registering a vehicle in Ontario that was previously registered outside Ontario, registering a rebuilt vehicle, or changing a vehicle's status from unfit to fit. Certain exemptions and vehicle specific requirements apply.",
         "items": [
           {
@@ -1832,82 +1832,82 @@ export const serviceConfigs: ServiceConfig[] = [
         ]
       },
       "process": {
-        "heading": "OUR FIVE STEP SAFETY INSPECTION PROCESS.",
+        "heading": "Our five step safety inspection process.",
         "steps": [
           {
-            "title": "INSPECT",
+            "title": "Inspect",
             "description": "We examine the vehicle's applicable safety systems using the Ontario inspection requirements."
           },
           {
-            "title": "IDENTIFY",
+            "title": "Identify",
             "description": "Any safety related concerns are identified and explained clearly so you understand what your vehicle needs."
           },
           {
-            "title": "REPAIR",
+            "title": "Repair",
             "description": "If repairs are required, our technicians can address qualifying mechanical and safety issues using quality replacement parts and proper repair procedures."
           },
           {
-            "title": "REINSPECT",
+            "title": "Reinspect",
             "description": "After required repairs are completed, the vehicle can be assessed again as applicable to determine whether it meets the required standard."
           },
           {
-            "title": "CERTIFY",
+            "title": "Certify",
             "description": "When the vehicle passes the applicable inspection at a licensed DriveON Vehicle Inspection Centre, the Safety Standards Certificate is issued electronically."
           }
         ]
       },
       "inspectChecklist": {
         "eyebrow": "WHAT WE INSPECT",
-        "heading": "SAFETY RELATED VEHICLE SYSTEMS WE CHECK.",
+        "heading": "Safety related vehicle systems we check.",
         "body": "A proper Ontario safety inspection is designed to determine whether a vehicle meets the minimum safety requirements at the time of inspection. It is not a general vehicle condition report or a guarantee of future reliability.",
         "items": [
           {
-            "title": "BRAKES",
+            "title": "Brakes",
             "description": "Brake condition and operation."
           },
           {
-            "title": "STEERING",
+            "title": "Steering",
             "description": "Steering components and safe vehicle control."
           },
           {
-            "title": "SUSPENSION",
+            "title": "Suspension",
             "description": "Suspension components and related safety concerns."
           },
           {
-            "title": "TIRES",
+            "title": "Tires",
             "description": "Tire condition and wheel related safety items."
           },
           {
-            "title": "LIGHTING",
+            "title": "Lighting",
             "description": "Required lamps and lighting functions."
           },
           {
-            "title": "GLAZING",
+            "title": "Glazing",
             "description": "Applicable glass and visibility requirements."
           },
           {
-            "title": "BODY AND STRUCTURE",
+            "title": "Body and structure",
             "description": "Safety related body and structural conditions."
           },
           {
-            "title": "OTHER SAFETY SYSTEMS",
+            "title": "Other safety systems",
             "description": "Additional components covered by the applicable Ontario inspection standard."
           }
         ]
       },
       "readyBlock": {
         "eyebrow": "SAFETY CERTIFICATE BRAMPTON",
-        "heading": "GET YOUR VEHICLE READY BEFORE YOU GO TO SERVICEONTARIO.",
+        "heading": "Get your vehicle ready before you go to ServiceOntario.",
         "paragraphs": [
           "If you are preparing to transfer ownership or register a vehicle, getting the required safety inspection completed is an important part of the process. A Safety Standards Certificate confirms that the vehicle met Ontario's minimum safety standards on the date it was issued.",
           "Once the vehicle passes, the certificate is provided electronically and can be used for the applicable registration process. Ontario states that a Safety Standards Certificate is valid for 36 calendar days after the inspection.",
           "Sultan Motors can help you understand what your vehicle needs before you complete the registration process, so you are not left guessing about brakes, suspension, tires, steering, lights, or other safety related repairs."
         ]
       },
-      "faqHeading": "QUESTIONS BRAMPTON DRIVERS ASK ABOUT SAFETY CERTIFICATES.",
+      "faqHeading": "Questions Brampton drivers ask about safety certificates.",
       "cta": {
         "eyebrow": "BOOK YOUR SAFETY INSPECTION",
-        "heading": "READY TO GET YOUR VEHICLE SAFETY APPROVED?",
+        "heading": "Ready to get your vehicle safety approved?",
         "body": "Speak with Sultan Motors about your Ontario Safety Standards Certificate inspection, required safety repairs, or vehicle registration needs at 5 Melanie Dr Unit 2 in Brampton."
       },
       "faqs": [

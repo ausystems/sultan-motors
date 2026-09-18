@@ -24,7 +24,7 @@ export interface Crumb {
 
 /**
  * Visible breadcrumb trail per route, also emitted as BreadcrumbList JSON-LD.
- * Trails stay two levels deep because the site has no /services index page —
+ * Trails stay two levels deep because the site has no /services index page, so
  * every entry here resolves to a real, indexable URL.
  */
 export const breadcrumbTrails: Record<string, Crumb[]> = {
@@ -157,7 +157,7 @@ interface ServiceMeta {
   ogDescription: string
   serviceType: string
   serviceDescription: string
-  /** Breadcrumb label — shorter than the page title. */
+  /** Breadcrumb label, shorter than the page title. */
   crumb: string
 }
 

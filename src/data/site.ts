@@ -55,7 +55,7 @@ export const business = {
   addressCountry: 'CA',
   /**
    * Approximate shop coordinates. Verify against the Google Business Profile
-   * listing before launch — Google cross-checks these against the GBP pin.
+   * listing before launch; Google cross-checks these against the GBP pin.
    */
   latitude: 43.7113,
   longitude: -79.6866,
@@ -131,7 +131,7 @@ export const ogImageUrl = absoluteUrl(OG_IMAGE.path)
 
 /**
  * Square brand mark for the schema.org `logo` property, which Google may use
- * in the knowledge panel. It must be square and at least 112x112 — the 1200x630
+ * in the knowledge panel. It must be square and at least 112x112; the 1200x630
  * social card is the wrong shape for this slot.
  *
  * This is currently the generated "S" mark from scripts/optimize_images.py.

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 import { useSubmit } from '@formspree/react'
 import SiteNavbar from '../components/SiteNavbar'
@@ -7,39 +7,40 @@ import Seo from '../components/Seo'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { SkipToContent, Main } from '../components/PageShell'
 import { pageSeo, breadcrumbTrails } from '../data/seo'
-import { business, FORMSPREE_FORM_ID } from '../data/site'
+import { business, openingHours, FORMSPREE_FORM_ID } from '../data/site'
+import { useHeroReveal } from '../motion/useHeroReveal'
+import { useReveal } from '../motion/useReveal'
 
 /**
  * Practical detail for anyone about to book. This is the page's only body copy
- * besides the form itself, which otherwise leaves it far thinner than every
- * other indexable page on the site.
+ * besides the form itself.
  */
 const bookingNotes = [
   {
     title: 'Bring your ownership and VIN',
-    body: 'Your vehicle registration and VIN let us pull the exact service schedule and parts catalogue for your model year, so the estimate reflects your car and not a generic average.',
+    body: 'Your registration and VIN let us pull the exact service schedule and parts catalogue for your model year, so the estimate reflects your car and not a generic average.',
   },
   {
     title: 'Describe the symptom, not the fix',
-    body: 'Tell us what you hear, feel, or smell and when it happens. Noise on cold starts and noise under braking point at completely different systems, and the detail saves diagnostic time you would otherwise pay for.',
+    body: 'Tell us what you hear, feel or smell and when it happens. Noise on cold starts and noise under braking point at different systems, and the detail saves diagnostic time you would otherwise pay for.',
   },
   {
     title: 'Nothing is approved until you approve it',
-    body: 'We inspect first, then send a written estimate covering parts, labour, and timeline. No work begins and no charge is incurred until you say yes to that quote.',
+    body: 'We inspect first, then send a written estimate covering parts, labour and timeline. No work begins and no charge is incurred until you say yes to that quote.',
   },
   {
-    title: 'Booking a slot, not a completion time',
-    body: 'The time you choose is your drop off. We confirm a realistic pickup window once a technician has seen the vehicle, and we call you rather than making you chase us for updates.',
+    title: 'A drop off time, not a completion time',
+    body: 'The time you choose is when you drop the vehicle off. We confirm a realistic pickup window once a technician has seen it, and we call you rather than leaving you to chase us.',
   },
 ]
 
 const serviceOptions = [
-  { id: 'oil-change', label: 'Oil Change' },
-  { id: 'tire-service', label: 'Tire Service' },
-  { id: 'brake-service', label: 'Brake Service' },
+  { id: 'oil-change', label: 'Oil change' },
+  { id: 'tire-service', label: 'Tire service' },
+  { id: 'brake-service', label: 'Brake service' },
   { id: 'diagnostics', label: 'Diagnostics' },
-  { id: 'engine-repair', label: 'Engine Repair' },
-  { id: 'other', label: 'Other' },
+  { id: 'engine-repair', label: 'Engine repair' },
+  { id: 'other', label: 'Something else' },
 ]
 
 const bookingSchema = z.object({
@@ -126,7 +127,14 @@ function toDateKey(date: Date): string {
     .padStart(2, '0')}`
 }
 
+const steps = ['Service', 'Date and time', 'Details', 'Review', 'Sent']
+
 export default function ContactPage() {
+  const hero = useRef<HTMLElement>(null)
+  const page = useRef<HTMLDivElement>(null)
+  useHeroReveal(hero)
+  useReveal(page)
+
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<BookingForm>({})
   const [errors, setErrors] = useState<FieldErrors>({})
@@ -186,10 +194,9 @@ export default function ContactPage() {
   /**
    * Sends the booking to Formspree, then confirms.
    *
-   * The order matters: before this existed the form showed "APPOINTMENT
-   * CONFIRMED" purely from local state, so a customer was told their slot was
-   * booked while the request never left the browser. Nothing is confirmed and
-   * no slot is reserved until Formspree has accepted the submission.
+   * Nothing is confirmed and no slot is reserved until Formspree has accepted
+   * the submission. A customer must never be told a request went through when
+   * it never left the browser.
    */
   const submit = async () => {
     const result = bookingSchema.safeParse(form)
@@ -209,9 +216,8 @@ export default function ContactPage() {
     const outcome = await sendBooking({
       // Formspree renders these keys as the labels in the notification email,
       // so they are written for whoever reads it at the shop, not for code.
-      _subject: `New booking — ${serviceLabelFor(booking)}, ${booking.name}, ${formatDate(booking.date)} ${formatTime(booking.time)}`,
-      // Formspree uses a field named "email" to set the reply-to, so a reply
-      // goes to the customer instead of nowhere.
+      _subject: `New booking, ${serviceLabelFor(booking)}, ${booking.name}, ${formatDate(booking.date)} ${formatTime(booking.time)}`,
+      // A field named "email" sets the reply-to, so a reply reaches the customer.
       email: booking.email || '',
       Name: booking.name,
       Phone: booking.phone,
@@ -221,8 +227,7 @@ export default function ContactPage() {
       'License plate': booking.licensePlate || 'Not provided',
       'Drop off': `${formatDate(booking.date)} at ${formatTime(booking.time)}`,
       Notes: booking.notes || 'None',
-      // Spam trap. Formspree discards any submission where this is filled;
-      // a human never sees the field.
+      // Spam trap. Formspree discards any submission where this is filled.
       _gotcha: honeypot,
     })
 
@@ -252,75 +257,56 @@ export default function ContactPage() {
     setStep(1)
   }
 
-  const inputCls =
-    'w-full rounded-xl border border-white/15 bg-black px-4 py-3.5 text-sm text-white placeholder-white/40 outline-none transition focus:border-[#e6ff3d] focus:ring-2 focus:ring-[#e6ff3d]/30'
-  const labelCls = 'mb-2 block text-[11px] font-bold tracking-[0.2em] text-[#e6ff3d]'
-
   return (
-    <div className="min-h-screen bg-black font-sans">
+    <div className="bg-ink text-paper">
       <Seo {...pageSeo['contact']} />
       <SkipToContent />
       <Main>
-      <SiteNavbar theme="dark" />
-      <section className="bg-black px-4 py-16 sm:px-6 sm:py-20 md:px-8 md:py-28">
-        <div className="mx-auto max-w-5xl">
-          <Breadcrumbs trail={breadcrumbTrails['contact']} theme="dark" className="mb-6" />
-          <h1 className="max-w-3xl text-3xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-4xl md:text-5xl">
-            BOOK AN AUTO REPAIR APPOINTMENT IN BRAMPTON
-          </h1>
-          <p className="mt-6 mb-10 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base md:mb-14">
-            Choose the service you need, pick a drop off date and time, and
-            reserve a bay at Sultan Motors, {business.streetAddress},{' '}
-            {business.addressLocality}. Prefer to talk it through? Call{' '}
-            <a
-              href={`tel:${business.phoneRaw}`}
-              className="font-semibold text-[#e6ff3d] underline-offset-4 hover:underline"
-            >
-              {business.phoneDisplay}
-            </a>{' '}
-            during shop hours.
-          </p>
-          <div className="mb-10 flex flex-wrap items-center gap-2 sm:gap-3">
-            {['Service', 'Date & Time', 'Details', 'Review', 'Confirmed'].map((label, i) => {
-              const num = i + 1
-              const current = step === num
-              const done = step > num
-              return (
-                <div key={label} className="flex items-center gap-2 sm:gap-3">
-                  <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-bold transition sm:h-9 sm:w-9 ${
-                      done
-                        ? 'border-[#e6ff3d] bg-[#e6ff3d] text-black'
-                        : current
-                          ? 'border-[#e6ff3d] bg-black text-[#e6ff3d]'
-                          : 'border-white/20 bg-black text-white/40'
+        <div ref={page}>
+          <section ref={hero}>
+            <SiteNavbar theme="dark" />
+            <div className="wrap pt-4">
+              <Breadcrumbs trail={breadcrumbTrails['contact']} theme="dark" />
+              <div className="grid-12 items-end gap-y-8 pb-14 pt-14 md:pb-20 md:pt-20">
+                <h1 data-hero-title className="t-h1 col-span-12 max-w-[14ch] lg:col-span-8">
+                  Book an auto repair appointment in Brampton
+                </h1>
+                <p data-hero-rest className="t-lead col-span-12 max-w-[44ch] text-paper/70 lg:col-span-4">
+                  Choose the service, pick a drop off time and reserve a bay. Prefer to talk it
+                  through? Call{' '}
+                  <a href={`tel:${business.phoneRaw}`} className="link-ul text-paper">
+                    {business.phoneDisplay}
+                  </a>{' '}
+                  during shop hours.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* The wizard. One column of type on the black surface, no box. */}
+          <section className="wrap pb-[var(--spacing-section)]">
+            <ol className="rule-dark flex flex-wrap gap-x-8 gap-y-2 pt-6" aria-label="Booking steps">
+              {steps.map((label, i) => {
+                const num = i + 1
+                const current = step === num
+                const done = step > num
+                return (
+                  <li
+                    key={label}
+                    aria-current={current ? 'step' : undefined}
+                    className={`t-index flex items-baseline gap-2.5 transition-colors duration-300 ${
+                      current ? 'text-accent' : done ? 'text-paper/70' : 'text-paper/35'
                     }`}
                   >
-                    {done ? '✓' : num}
-                  </div>
-                  <span
-                    className={`hidden text-[11px] font-bold tracking-[0.2em] sm:inline ${
-                      current ? 'text-white' : done ? 'text-white/70' : 'text-white/40'
-                    }`}
-                  >
-                    {label.toUpperCase()}
-                  </span>
-                  {i < 4 && <span className="hidden h-px w-8 bg-white/10 sm:inline-block md:w-12" />}
-                </div>
-              )
-            })}
-          </div>
-          <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-[#111214] shadow-[0_0_60px_-15px_rgba(230,255,61,0.15)] sm:p-8 md:p-10">
-            <div className="absolute top-0 left-0 h-1.5 w-full bg-[#e6ff3d]" />
-            {/*
-              A real <form>, so the controls are grouped for assistive tech,
-              autofill can populate name/phone/email, and Enter advances the
-              wizard instead of doing nothing. Every button that is not the
-              final submit needs an explicit type="button" — inside a form the
-              default type is "submit".
-            */}
+                    <span className="tnum">{String(num).padStart(2, '0')}</span>
+                    <span>{label}</span>
+                  </li>
+                )
+              })}
+            </ol>
+
             <form
-              className="p-6 sm:p-0"
+              className="grid-12 mt-12 md:mt-16"
               noValidate
               onSubmit={(e) => {
                 e.preventDefault()
@@ -328,414 +314,266 @@ export default function ContactPage() {
                 else submit()
               }}
             >
-              <div className="mb-8 flex items-center gap-3 border-b border-white/10 pb-5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e6ff3d] text-black">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="text-[11px] font-bold tracking-[0.2em] text-[#e6ff3d]">
-                    BOOKING FORM
-                  </div>
-                  <div className="text-sm font-semibold text-white/70">
-                    Complete all steps to reserve your bay
-                  </div>
-                </div>
-              </div>
-              {step === 1 && (
-                <StepService form={form} setField={setField} errors={errors} inputCls={inputCls} labelCls={labelCls} />
-              )}
-              {step === 2 && (
-                <StepDateTime
-                  form={form}
-                  setField={setField}
-                  errors={errors}
-                  calMonth={calMonth}
-                  setCalMonth={setCalMonth}
-                  booked={booked}
-                />
-              )}
-              {step === 3 && (
-                <StepDetails form={form} setField={setField} errors={errors} inputCls={inputCls} labelCls={labelCls} />
-              )}
-              {step === 4 && <StepReview form={form} />}
-              {step === 5 && confirmed && <StepConfirmed booking={confirmed} onReset={reset} />}
-              {step < 5 && (
-                <div className="mt-8 border-t border-white/10 pt-6">
-                  {sendError && (
-                    <div
-                      role="alert"
-                      className="mb-5 rounded-2xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200"
-                    >
-                      <p className="font-semibold text-red-100">
-                        We could not send your request.
-                      </p>
-                      <p className="mt-1 leading-relaxed">{sendError}</p>
-                      <p className="mt-2 leading-relaxed">
-                        Your details are still filled in, so you can try again. If it
-                        keeps failing, call{' '}
-                        <a
-                          href={`tel:${business.phoneRaw}`}
-                          className="font-semibold text-[#e6ff3d] underline-offset-4 hover:underline"
-                        >
-                          {business.phoneDisplay}
-                        </a>{' '}
-                        and we will book you in over the phone.
-                      </p>
-                    </div>
-                  )}
-                  {/*
-                    Spam trap. Formspree discards any submission where _gotcha is
-                    filled. It is hidden from sight and from assistive tech, and
-                    taken out of the tab order, so only a bot ever fills it.
-                  */}
-                  <input
-                    type="text"
-                    name="_gotcha"
-                    value={honeypot}
-                    onChange={(e) => setHoneypot(e.target.value)}
-                    tabIndex={-1}
-                    autoComplete="off"
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-[-9999px] h-px w-px opacity-0"
+              <div className="col-span-12 lg:col-span-8 lg:col-start-3">
+                {step === 1 && <StepService form={form} setField={setField} errors={errors} />}
+                {step === 2 && (
+                  <StepDateTime
+                    form={form}
+                    setField={setField}
+                    errors={errors}
+                    calMonth={calMonth}
+                    setCalMonth={setCalMonth}
+                    booked={booked}
                   />
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <button
-                      type="button"
-                      onClick={goBack}
-                      disabled={step === 1 || sending}
-                      className="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                      Back
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={sending}
-                      aria-busy={sending}
-                      className="rounded-full bg-[#e6ff3d] px-8 py-3 text-sm font-bold text-black transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {step < 4 ? 'Continue' : sending ? 'Sending…' : 'Book Appointment'}
-                    </button>
+                )}
+                {step === 3 && <StepDetails form={form} setField={setField} errors={errors} />}
+                {step === 4 && <StepReview form={form} />}
+                {step === 5 && confirmed && <StepConfirmed booking={confirmed} onReset={reset} />}
+
+                {step < 5 && (
+                  <div className="rule-dark mt-12 pt-8">
+                    {sendError && (
+                      <div role="alert" className="mb-8 max-w-[56ch] border-l-2 border-red-400 pl-5">
+                        <p className="font-medium">We could not send your request.</p>
+                        <p className="t-body mt-1 text-paper/70">{sendError}</p>
+                        <p className="t-body mt-2 text-paper/70">
+                          Your details are still filled in, so you can try again. If it keeps
+                          failing, call{' '}
+                          <a href={`tel:${business.phoneRaw}`} className="link-ul text-paper">
+                            {business.phoneDisplay}
+                          </a>{' '}
+                          and we will book you in over the phone.
+                        </p>
+                      </div>
+                    )}
+                    {/*
+                      Spam trap. Formspree discards any submission where _gotcha is
+                      filled. Hidden from sight and assistive tech, and out of the tab
+                      order, so only a bot ever fills it.
+                    */}
+                    <input
+                      type="text"
+                      name="_gotcha"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      className="pointer-events-none absolute left-[-9999px] h-px w-px opacity-0"
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <button
+                        type="button"
+                        onClick={goBack}
+                        disabled={step === 1 || sending}
+                        className="link-ul t-body text-paper/70 hover:text-paper disabled:pointer-events-none disabled:opacity-0"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={sending}
+                        aria-busy={sending}
+                        className="btn btn-accent disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {step < 4 ? 'Continue' : sending ? 'Sending' : 'Send booking request'}
+                        {step < 4 && (
+                          <span className="arrow" aria-hidden="true">
+                            →
+                          </span>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </form>
-          </div>
-        </div>
-      </section>
-      <section className="bg-black px-4 pb-16 sm:px-6 sm:pb-20 md:px-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-5 md:mb-6">
-            <span className="text-[10px] font-semibold tracking-[0.2em] text-[#e6ff3d] sm:text-[11px]">
-              BEFORE YOU DROP OFF
-            </span>
-          </div>
-          <h2 className="mb-8 text-2xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-3xl md:text-4xl">
-            WHAT TO EXPECT WHEN YOU BOOK WITH SULTAN MOTORS.
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {bookingNotes.map((note, i) => (
-              <div
-                key={note.title}
-                className="rounded-2xl border border-white/10 bg-[#0a0a0a] p-6 sm:p-7"
-              >
-                <div className="text-[11px] font-bold tracking-[0.2em] text-white/40">
-                  {String(i + 1).padStart(2, '0')}
-                </div>
-                <h3 className="mt-3 text-lg font-extrabold tracking-tight text-white sm:text-xl">
-                  {note.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-white/60">{note.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section className="bg-black px-4 pb-20 sm:px-6 sm:pb-24 md:px-8 md:pb-32">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-5 md:mb-6">
-            <span className="text-[10px] font-semibold tracking-[0.2em] text-[#e6ff3d] sm:text-[11px]">
-              FIND US IN BRAMPTON
-            </span>
-          </div>
-          <h2 className="mb-8 text-3xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
-            VISIT SULTAN MOTORS IN BRAMPTON.
-          </h2>
-          <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-            <div className="overflow-hidden rounded-2xl border border-white/10 sm:rounded-3xl">
-              <iframe
-                title="Sultan Motors location map"
-                src="https://maps.google.com/maps?q=5%20Melanie%20Dr%20Unit%202%20Brampton%20ON%20L6T%204K8&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                loading="lazy"
-                className="h-[320px] w-full sm:h-[440px] md:h-[560px]"
-                style={{ border: 0 }}
-              />
+          </section>
+
+          {/* Before you drop off. */}
+          <section className="section-y bg-ink-2">
+            <div className="wrap grid-12 gap-y-12">
+              <h2 data-reveal className="t-h2 col-span-12 max-w-[12ch] lg:col-span-4 lg:sticky lg:top-28 lg:self-start">
+                What to expect when you book.
+              </h2>
+              <ol data-reveal data-reveal-group className="col-span-12 lg:col-span-7 lg:col-start-6">
+                {bookingNotes.map((note, i) => (
+                  <li key={note.title} className="rule-dark grid grid-cols-[2.5rem_1fr] gap-x-4 py-7">
+                    <span className="t-index tnum pt-1.5 text-paper/35">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div>
+                      <h3 className="t-h3 text-[1.25rem] md:text-[1.375rem]">{note.title}</h3>
+                      <p className="t-body mt-2 max-w-[52ch] text-paper/60">{note.body}</p>
+                    </div>
+                  </li>
+                ))}
+                <li className="rule-dark" aria-hidden="true" />
+              </ol>
             </div>
-            <div className="flex flex-col gap-4">
-              <div className="rounded-3xl border border-white/10 bg-[#0a0a0a] p-6 sm:p-8">
-                <h3 className="mb-3 text-[11px] font-bold tracking-[0.25em] text-[#e6ff3d]">
-                  CALL
-                </h3>
-                <a
-                  href={`tel:${business.phoneRaw}`}
-                  className="block text-2xl font-extrabold text-white hover:text-[#e6ff3d]"
+          </section>
+
+          <section className="section-y">
+            <div className="wrap">
+              <div className="grid-12 gap-y-10">
+                <h2 data-reveal className="t-h2 col-span-12 max-w-[14ch] lg:col-span-7">
+                  {business.streetAddress}, {business.addressLocality}.
+                </h2>
+                <dl
+                  data-reveal
+                  className="col-span-12 grid grid-cols-[auto_1fr] gap-x-8 gap-y-3 self-end text-paper/60 lg:col-span-4 lg:col-start-9"
                 >
-                  {business.phoneDisplay}
-                </a>
+                  {openingHours.map((block) => (
+                    <div key={block.label} className="contents">
+                      <dt>{block.label}</dt>
+                      <dd className="tnum text-paper">{block.display}</dd>
+                    </div>
+                  ))}
+                  <dt>Sunday</dt>
+                  <dd className="text-paper">Closed</dd>
+                  <dt>Phone</dt>
+                  <dd>
+                    <a href={`tel:${business.phoneRaw}`} className="link-ul text-paper">
+                      {business.phoneDisplay}
+                    </a>
+                  </dd>
+                </dl>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-[#0a0a0a] p-6 sm:p-8">
-                <h3 className="mb-3 text-[11px] font-bold tracking-[0.25em] text-[#e6ff3d]">
-                  VISIT
-                </h3>
-                <address className="not-italic">
-                  <p className="text-lg font-extrabold text-white">
-                    {business.streetAddress}
-                  </p>
-                  <p className="text-lg font-extrabold text-white">
-                    {business.addressLocality}, {business.addressRegion}{' '}
-                    {business.postalCode}
-                  </p>
-                </address>
-              </div>
-              <div className="rounded-3xl border border-white/10 bg-[#0a0a0a] p-6 sm:p-8">
-                <h3 className="mb-3 text-[11px] font-bold tracking-[0.25em] text-[#e6ff3d]">
-                  HOURS
-                </h3>
-                <div className="space-y-1.5 text-sm">
-                  <div className="flex justify-between text-white">
-                    <span>Mon to Fri</span>
-                    <span className="font-semibold">8am to 6pm</span>
-                  </div>
-                  <div className="flex justify-between text-white">
-                    <span>Saturday</span>
-                    <span className="font-semibold">9am to 3pm</span>
-                  </div>
-                  <div className="flex justify-between text-white/50">
-                    <span>Sunday</span>
-                    <span className="font-semibold">Closed</span>
-                  </div>
-                </div>
+              <div data-reveal className="mt-14 overflow-hidden bg-ink-3">
+                <iframe
+                  title="Sultan Motors location map"
+                  src="https://maps.google.com/maps?q=5%20Melanie%20Dr%20Unit%202%20Brampton%20ON%20L6T%204K8&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  loading="lazy"
+                  className="h-[320px] w-full grayscale invert-[0.92] hue-rotate-180 sm:h-[420px] md:h-[520px]"
+                  style={{ border: 0 }}
+                />
               </div>
             </div>
-          </div>
+          </section>
         </div>
-      </section>
-        </Main>
+      </Main>
       <SiteFooter />
     </div>
   )
 }
 
-interface StepFieldProps {
+/* ------------------------------------------------------------------------ */
+/* Steps                                                                     */
+/* ------------------------------------------------------------------------ */
+
+interface StepProps {
   form: BookingForm
   setField: (field: keyof Booking, value: string) => void
   errors: FieldErrors
-  inputCls: string
-  labelCls: string
 }
 
-interface TextFieldProps {
-  id: string
-  name: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-  inputCls: string
-  labelCls: string
-  error?: string
-  placeholder?: string
-  type?: string
-  autoComplete?: string
-  inputMode?: 'numeric' | 'text' | 'tel' | 'email'
-  maxLength?: number
-  rows?: number
-  optional?: boolean
-}
-
-/**
- * A labelled form control.
- *
- * The label is tied to the control with htmlFor/id, and the error message is
- * tied to it with aria-describedby. Without that pairing a screen reader
- * announces these inputs as unlabelled — the placeholder is not a label, and it
- * disappears as soon as the user types.
- */
-function TextField({
-  id,
-  name,
-  label,
-  value,
-  onChange,
-  inputCls,
-  labelCls,
-  error,
-  placeholder,
-  type = 'text',
-  autoComplete,
-  inputMode,
-  maxLength,
-  rows,
-  optional,
-}: TextFieldProps) {
-  const errorId = `${id}-error`
-  const shared = {
-    id,
-    name,
-    value,
-    placeholder,
-    autoComplete,
-    maxLength,
-    className: inputCls,
-    'aria-invalid': error ? (true as const) : undefined,
-    'aria-describedby': error ? errorId : undefined,
-    onChange: (
-      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ) => onChange(e.target.value),
-  }
-
+function StepHeading({ index, title }: { index: number; title: string }) {
   return (
-    <div>
-      <label className={labelCls} htmlFor={id}>
-        {label}
-        {optional && <span className="ml-1 font-normal text-white/40">(optional)</span>}
-      </label>
-      {rows ? (
-        <textarea {...shared} rows={rows} />
-      ) : (
-        <input {...shared} type={type} inputMode={inputMode} />
-      )}
-      {error && (
-        <p id={errorId} role="alert" className="mt-1 text-xs text-red-400">
-          {error}
-        </p>
-      )}
+    <div className="flex items-baseline gap-4">
+      <span className="t-index tnum text-paper/40">{String(index).padStart(2, '0')}</span>
+      <h2 className="t-h3">{title}</h2>
     </div>
   )
 }
 
-function StepService({ form, setField, errors, inputCls, labelCls }: StepFieldProps) {
+function StepService({ form, setField, errors }: StepProps) {
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
-        <span className="text-[11px] font-bold tracking-[0.25em] text-white/60">STEP 1</span>
-        <span className="text-[11px] font-bold tracking-[0.25em] text-[#e6ff3d]">
-          SERVICE &amp; VEHICLE
-        </span>
-      </div>
-      <div className={labelCls}>SELECT A SERVICE</div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {serviceOptions.map((option) => {
-          const selected = form.service === option.id
-          return (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => setField('service', option.id)}
-              className={`group rounded-2xl border p-4 text-left transition ${
-                selected
-                  ? 'border-[#e6ff3d] bg-[#e6ff3d]/10'
-                  : 'border-white/15 bg-black hover:border-white/40'
-              }`}
-            >
-              <div
-                className={`text-[11px] font-bold tracking-[0.2em] ${
-                  selected ? 'text-[#e6ff3d]' : 'text-white/40'
+      <StepHeading index={1} title="What does the vehicle need?" />
+      <fieldset className="mt-8">
+        <legend className="t-index text-paper/55">Service</legend>
+        <div className="mt-4 grid gap-x-8 sm:grid-cols-2">
+          {serviceOptions.map((option) => {
+            const selected = form.service === option.id
+            return (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setField('service', option.id)}
+                aria-pressed={selected}
+                className={`rule-dark group flex items-center gap-4 py-4 text-left transition-colors duration-300 ${
+                  selected ? 'text-accent' : 'text-paper/85 hover:text-paper'
                 }`}
               >
-                {selected ? 'SELECTED' : 'SERVICE'}
-              </div>
-              <div className="mt-2 text-base font-extrabold text-white">{option.label}</div>
-            </button>
-          )
-        })}
-      </div>
-      {errors.service && <p className="mt-2 text-xs text-red-400">{errors.service}</p>}
+                <span
+                  aria-hidden="true"
+                  className={`block h-2.5 w-2.5 shrink-0 border transition-colors duration-300 ${
+                    selected ? 'border-accent bg-accent' : 'border-paper/40 group-hover:border-paper'
+                  }`}
+                />
+                <span className="t-body">{option.label}</span>
+              </button>
+            )
+          })}
+        </div>
+        {errors.service && (
+          <p role="alert" className="t-small mt-3 text-red-300">
+            {errors.service}
+          </p>
+        )}
+      </fieldset>
+
       {form.service === 'other' && (
-        <div className="mt-6">
+        <div className="mt-8">
           <TextField
             id="other-service"
             name="otherService"
-            label="DESCRIBE THE SERVICE"
+            label="Describe the service"
             placeholder="What do you need help with?"
             value={form.otherService || ''}
             onChange={(v) => setField('otherService', v)}
             error={errors.otherService}
-            inputCls={inputCls}
-            labelCls={labelCls}
           />
         </div>
       )}
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+
+      <div className="mt-12 grid gap-x-8 gap-y-6 sm:grid-cols-3">
         <TextField
           id="vehicle-year"
           name="vehicleYear"
-          label="YEAR"
+          label="Year"
           placeholder="2020"
           inputMode="numeric"
           maxLength={4}
           value={form.vehicleYear || ''}
           onChange={(v) => setField('vehicleYear', v.replace(/\D/g, ''))}
           error={errors.vehicleYear}
-          inputCls={inputCls}
-          labelCls={labelCls}
         />
         <TextField
           id="vehicle-make"
           name="vehicleMake"
-          label="MAKE"
+          label="Make"
           placeholder="Toyota"
           value={form.vehicleMake || ''}
           onChange={(v) => setField('vehicleMake', v)}
           error={errors.vehicleMake}
-          inputCls={inputCls}
-          labelCls={labelCls}
         />
         <TextField
           id="vehicle-model"
           name="vehicleModel"
-          label="MODEL"
+          label="Model"
           placeholder="Camry"
           value={form.vehicleModel || ''}
           onChange={(v) => setField('vehicleModel', v)}
           error={errors.vehicleModel}
-          inputCls={inputCls}
-          labelCls={labelCls}
         />
       </div>
-      <div className="mt-4">
+      <div className="mt-6 sm:max-w-[50%]">
         <TextField
           id="license-plate"
           name="licensePlate"
-          label="LICENSE PLATE"
+          label="License plate"
           optional
           placeholder="ABCD 123"
           value={form.licensePlate || ''}
           onChange={(v) => setField('licensePlate', v.toUpperCase())}
-          inputCls={inputCls}
-          labelCls={labelCls}
         />
       </div>
     </div>
   )
 }
 
-interface StepDateTimeProps {
-  form: BookingForm
-  setField: (field: keyof Booking, value: string) => void
-  errors: FieldErrors
+interface StepDateTimeProps extends StepProps {
   calMonth: Date
   setCalMonth: (date: Date) => void
   booked: BookedSlots
@@ -759,48 +597,44 @@ function StepDateTime({ form, setField, errors, calMonth, setCalMonth, booked }:
   const selectedDate = form.date ? new Date(form.date + 'T00:00:00') : null
   const slots = selectedDate ? slotsForDate(selectedDate) : []
   const bookedTimes = (form.date && booked[form.date]) || []
+  const atCurrentMonth =
+    calMonth.getFullYear() === today.getFullYear() && calMonth.getMonth() === today.getMonth()
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
-        <span className="text-[11px] font-bold tracking-[0.25em] text-white/60">STEP 2</span>
-        <span className="text-[11px] font-bold tracking-[0.25em] text-[#e6ff3d]">
-          DROP OFF DATE &amp; TIME
-        </span>
-      </div>
-      <div className="grid gap-8 lg:grid-cols-2">
+      <StepHeading index={2} title="When would you like to drop it off?" />
+      <div className="mt-10 grid gap-x-12 gap-y-12 lg:grid-cols-[1.1fr_1fr]">
         <div>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <button
               type="button"
-              onClick={() => {
-                const prev = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1)
-                if (
-                  prev.getFullYear() < today.getFullYear() ||
-                  (prev.getFullYear() === today.getFullYear() && prev.getMonth() < today.getMonth())
-                )
-                  return
-                setCalMonth(prev)
-              }}
-              className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-bold text-white transition hover:border-[#e6ff3d] hover:text-[#e6ff3d]"
+              disabled={atCurrentMonth}
+              onClick={() =>
+                setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))
+              }
+              aria-label="Previous month"
+              className="link-ul t-small text-paper/70 hover:text-paper disabled:pointer-events-none disabled:opacity-25"
             >
               ← Prev
             </button>
-            <div className="text-sm font-extrabold uppercase tracking-[0.2em] text-white">
+            <p className="t-index text-paper" aria-live="polite">
               {monthLabel}
-            </div>
+            </p>
             <button
               type="button"
-              onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))}
-              className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-bold text-white transition hover:border-[#e6ff3d] hover:text-[#e6ff3d]"
+              onClick={() =>
+                setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))
+              }
+              aria-label="Next month"
+              className="link-ul t-small text-paper/70 hover:text-paper"
             >
               Next →
             </button>
           </div>
-          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold tracking-[0.15em] text-white/40">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+          <div className="t-index mt-6 grid grid-cols-7 text-center text-paper/35">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
               <div key={i} className="py-2">
-                {day}
+                {d}
               </div>
             ))}
           </div>
@@ -808,24 +642,29 @@ function StepDateTime({ form, setField, errors, calMonth, setCalMonth, booked }:
             {cells.map((date, i) => {
               if (!date) return <div key={i} className="aspect-square" />
               const key = toDateKey(date)
-              const past = date < today
-              const sunday = date.getDay() === 0
-              const disabled = past || sunday
+              const disabled = date < today || date.getDay() === 0
+              const selected = form.date === key
               return (
                 <button
                   key={i}
                   type="button"
                   disabled={disabled}
+                  aria-pressed={selected}
+                  aria-label={date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                   onClick={() => {
                     setField('date', key)
                     setField('time', '')
                   }}
-                  className={`aspect-square rounded-lg text-sm font-semibold transition ${
-                    form.date === key
-                      ? 'bg-[#e6ff3d] text-black'
+                  className={`tnum aspect-square text-sm transition-colors duration-200 ${
+                    selected
+                      ? 'bg-accent text-ink'
                       : disabled
-                        ? 'cursor-not-allowed text-white/20'
-                        : 'bg-white/5 text-white hover:bg-white/10'
+                        ? 'cursor-not-allowed text-paper/20'
+                        : 'text-paper hover:bg-paper/10'
                   }`}
                 >
                   {date.getDate()}
@@ -833,41 +672,42 @@ function StepDateTime({ form, setField, errors, calMonth, setCalMonth, booked }:
               )
             })}
           </div>
-          {errors.date && <p className="mt-2 text-xs text-red-400">{errors.date}</p>}
-          <p className="mt-4 text-[11px] text-white/40">
-            Closed on Sundays. Past dates are unavailable.
-          </p>
+          {errors.date && (
+            <p role="alert" className="t-small mt-3 text-red-300">
+              {errors.date}
+            </p>
+          )}
+          <p className="t-small mt-4 text-paper/40">Closed on Sundays.</p>
         </div>
+
         <div>
-          <div className="mb-4 text-[11px] font-bold tracking-[0.25em] text-[#e6ff3d]">
-            {form.date ? 'AVAILABLE TIMES' : 'PICK A DATE FIRST'}
-          </div>
+          <p className="t-index text-paper/55">{form.date ? 'Available times' : 'Pick a date first'}</p>
           {!form.date && (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-black/40 p-8 text-center text-sm text-white/40">
-              Select a date to see available drop off times.
-            </div>
+            <p className="t-body mt-4 max-w-[30ch] text-paper/40">
+              Select a date to see drop off times.
+            </p>
           )}
           {form.date && slots.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-black/40 p-8 text-center text-sm text-white/40">
-              This day is closed. Choose another date.
-            </div>
+            <p className="t-body mt-4 text-paper/40">This day is closed. Choose another date.</p>
           )}
           {form.date && slots.length > 0 && (
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
               {slots.map((slot) => {
                 const taken = bookedTimes.includes(slot)
+                const selected = form.time === slot
                 return (
                   <button
                     key={slot}
                     type="button"
                     disabled={taken}
+                    aria-pressed={selected}
                     onClick={() => setField('time', slot)}
-                    className={`rounded-xl border px-2 py-3 text-xs font-bold transition ${
-                      form.time === slot
-                        ? 'border-[#e6ff3d] bg-[#e6ff3d] text-black'
+                    className={`tnum border px-2 py-2.5 text-sm transition-colors duration-200 ${
+                      selected
+                        ? 'border-accent bg-accent text-ink'
                         : taken
-                          ? 'cursor-not-allowed border-white/5 bg-black text-white/20 line-through'
-                          : 'border-white/15 bg-black text-white hover:border-[#e6ff3d] hover:text-[#e6ff3d]'
+                          ? 'cursor-not-allowed border-paper/10 text-paper/20 line-through'
+                          : 'border-paper/20 text-paper hover:border-paper'
                     }`}
                   >
                     {formatTime(slot)}
@@ -876,37 +716,36 @@ function StepDateTime({ form, setField, errors, calMonth, setCalMonth, booked }:
               })}
             </div>
           )}
-          {errors.time && <p className="mt-2 text-xs text-red-400">{errors.time}</p>}
+          {errors.time && (
+            <p role="alert" className="t-small mt-3 text-red-300">
+              {errors.time}
+            </p>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-function StepDetails({ form, setField, errors, inputCls, labelCls }: StepFieldProps) {
+function StepDetails({ form, setField, errors }: StepProps) {
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
-        <span className="text-[11px] font-bold tracking-[0.25em] text-white/60">STEP 3</span>
-        <span className="text-[11px] font-bold tracking-[0.25em] text-[#e6ff3d]">YOUR DETAILS</span>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <StepHeading index={3} title="How do we reach you?" />
+      <div className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2">
         <TextField
           id="customer-name"
           name="name"
-          label="FULL NAME"
+          label="Full name"
           autoComplete="name"
           placeholder="Your full name"
           value={form.name || ''}
           onChange={(v) => setField('name', v)}
           error={errors.name}
-          inputCls={inputCls}
-          labelCls={labelCls}
         />
         <TextField
           id="customer-phone"
           name="phone"
-          label="PHONE"
+          label="Phone"
           type="tel"
           inputMode="tel"
           autoComplete="tel"
@@ -914,14 +753,12 @@ function StepDetails({ form, setField, errors, inputCls, labelCls }: StepFieldPr
           value={form.phone || ''}
           onChange={(v) => setField('phone', v)}
           error={errors.phone}
-          inputCls={inputCls}
-          labelCls={labelCls}
         />
         <div className="sm:col-span-2">
           <TextField
             id="customer-email"
             name="email"
-            label="EMAIL"
+            label="Email"
             optional
             type="email"
             inputMode="email"
@@ -930,23 +767,19 @@ function StepDetails({ form, setField, errors, inputCls, labelCls }: StepFieldPr
             value={form.email || ''}
             onChange={(v) => setField('email', v)}
             error={errors.email}
-            inputCls={inputCls}
-            labelCls={labelCls}
           />
         </div>
         <div className="sm:col-span-2">
           <TextField
             id="customer-notes"
             name="notes"
-            label="ADDITIONAL NOTES"
+            label="Notes"
             optional
-            rows={5}
+            rows={4}
             maxLength={1000}
-            placeholder="Describe the issue, symptoms, or anything we should know"
+            placeholder="Describe the issue, the symptoms, or anything we should know"
             value={form.notes || ''}
             onChange={(v) => setField('notes', v)}
-            inputCls={inputCls}
-            labelCls={labelCls}
           />
         </div>
       </div>
@@ -955,81 +788,145 @@ function StepDetails({ form, setField, errors, inputCls, labelCls }: StepFieldPr
 }
 
 function StepReview({ form }: { form: BookingForm }) {
-  const serviceLabel = serviceLabelFor(form)
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between border-b border-white/10 pb-4">
-        <span className="text-[11px] font-bold tracking-[0.25em] text-white/60">STEP 4</span>
-        <span className="text-[11px] font-bold tracking-[0.25em] text-[#e6ff3d]">REVIEW</span>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ReviewItem label="Service" value={serviceLabel} />
+      <StepHeading index={4} title="Everything look right?" />
+      <dl className="mt-8">
+        <ReviewItem label="Service" value={serviceLabelFor(form)} />
         <ReviewItem
           label="Vehicle"
           value={`${form.vehicleYear || ''} ${form.vehicleMake || ''} ${form.vehicleModel || ''}`.trim()}
         />
-        <ReviewItem label="License Plate" value={form.licensePlate || 'Not provided'} />
+        <ReviewItem label="License plate" value={form.licensePlate || 'Not provided'} />
         <ReviewItem
-          label="Drop Off"
+          label="Drop off"
           value={`${form.date ? formatDate(form.date) : ''} at ${form.time ? formatTime(form.time) : ''}`}
         />
         <ReviewItem label="Name" value={form.name || ''} />
         <ReviewItem label="Phone" value={form.phone || ''} />
         <ReviewItem label="Email" value={form.email || 'Not provided'} />
-        <ReviewItem label="Notes" value={form.notes || 'None'} full />
-      </div>
+        <ReviewItem label="Notes" value={form.notes || 'None'} />
+      </dl>
     </div>
   )
 }
 
-function ReviewItem({ label, value, full }: { label: string; value?: string; full?: boolean }) {
+function ReviewItem({ label, value }: { label: string; value?: string }) {
   return (
-    <div className={`rounded-2xl border border-white/10 bg-black p-4 ${full ? 'sm:col-span-2' : ''}`}>
-      <div className="text-[10px] font-bold tracking-[0.25em] text-[#e6ff3d]">
-        {label.toUpperCase()}
-      </div>
-      <div className="mt-2 break-words text-sm font-semibold text-white">{value || '—'}</div>
+    <div className="rule-dark grid grid-cols-[7rem_1fr] gap-x-6 py-4 sm:grid-cols-[10rem_1fr]">
+      <dt className="t-index pt-1 text-paper/45">{label}</dt>
+      <dd className="t-body break-words text-paper">{value || 'None'}</dd>
     </div>
   )
 }
 
+/**
+ * The end state. Formspree has accepted the request and the shop has been
+ * emailed. It is a request until someone at the shop calls back, and the copy
+ * says so; it does not claim a confirmed appointment.
+ */
 function StepConfirmed({ booking, onReset }: { booking: Booking; onReset: () => void }) {
-  const serviceLabel = serviceLabelFor(booking)
   return (
-    <div className="text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e6ff3d] text-3xl font-black text-black">
-        ✓
-      </div>
-      <h2 className="mt-6 text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
-        APPOINTMENT CONFIRMED
+    <div>
+      <p className="t-index text-accent">Request sent</p>
+      <h2 className="t-h2 mt-5 max-w-[16ch]">
+        Thanks {booking.name.split(' ')[0]}. We have your request.
       </h2>
-      <p className="mx-auto mt-3 max-w-xl text-sm text-white/60">
-        Thanks {booking.name.split(' ')[0]}. We have reserved your slot and will call {booking.phone} to confirm the details.
+      <p className="t-body mt-6 max-w-[48ch] text-paper/70">
+        A technician will call {booking.phone} to confirm the drop off and answer any questions
+        before the day.
       </p>
-      <div className="mt-8 grid gap-3 text-left sm:grid-cols-2">
-        <ReviewItem label="Service" value={serviceLabel} />
+      <dl className="mt-10">
+        <ReviewItem label="Service" value={serviceLabelFor(booking)} />
         <ReviewItem
           label="Vehicle"
           value={`${booking.vehicleYear} ${booking.vehicleMake} ${booking.vehicleModel}`}
         />
-        <ReviewItem label="Drop Off Date" value={formatDate(booking.date)} />
-        <ReviewItem label="Drop Off Time" value={formatTime(booking.time)} />
-      </div>
-      <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <a
-          href={`tel:${business.phoneRaw}`}
-          className="rounded-full border border-[#e6ff3d]/50 px-7 py-3 text-sm font-bold text-[#e6ff3d] transition hover:bg-[#e6ff3d] hover:text-black"
-        >
+        <ReviewItem label="Drop off" value={`${formatDate(booking.date)} at ${formatTime(booking.time)}`} />
+      </dl>
+      <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+        <a href={`tel:${business.phoneRaw}`} className="btn btn-ghost-dark">
           Call the shop
         </a>
-        <button
-          type="button"
-          onClick={onReset}
-          className="rounded-full bg-[#e6ff3d] px-7 py-3 text-sm font-bold text-black transition hover:bg-white"
-        >
-          Book another appointment
+        <button type="button" onClick={onReset} className="link-ul text-paper/70 hover:text-paper">
+          Book another vehicle
         </button>
       </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------------ */
+/* Field                                                                     */
+/* ------------------------------------------------------------------------ */
+
+interface TextFieldProps {
+  id: string
+  name: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+  error?: string
+  placeholder?: string
+  type?: string
+  autoComplete?: string
+  inputMode?: 'numeric' | 'text' | 'tel' | 'email'
+  maxLength?: number
+  rows?: number
+  optional?: boolean
+}
+
+/**
+ * A labelled control on a baseline. The label is tied to the control with
+ * htmlFor/id and the error with aria-describedby, so assistive technology
+ * announces both; the placeholder is a hint, never the label.
+ */
+function TextField({
+  id,
+  name,
+  label,
+  value,
+  onChange,
+  error,
+  placeholder,
+  type = 'text',
+  autoComplete,
+  inputMode,
+  maxLength,
+  rows,
+  optional,
+}: TextFieldProps) {
+  const errorId = `${id}-error`
+  const shared = {
+    id,
+    name,
+    value,
+    placeholder,
+    autoComplete,
+    maxLength,
+    className: 'field',
+    'aria-invalid': error ? (true as const) : undefined,
+    'aria-describedby': error ? errorId : undefined,
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      onChange(e.target.value),
+  }
+
+  return (
+    <div>
+      <label className="t-index block text-paper/55" htmlFor={id}>
+        {label}
+        {optional && <span className="ml-2 normal-case tracking-normal text-paper/35">optional</span>}
+      </label>
+      {rows ? (
+        <textarea {...shared} rows={rows} />
+      ) : (
+        <input {...shared} type={type} inputMode={inputMode} />
+      )}
+      {error && (
+        <p id={errorId} role="alert" className="t-small mt-2 text-red-300">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

@@ -88,7 +88,7 @@ class PageParser(HTMLParser):
             self.labels.append(a)
         elif tag in ("input", "textarea", "select"):
             # A control that is hidden from assistive tech AND out of the tab
-            # order is not user-facing — a spam honeypot is the usual case, and
+            # order is not user-facing, a spam honeypot is the usual case, and
             # it is unlabelled on purpose. Anything a person can actually reach
             # still has to carry a label.
             hidden_from_at = (
@@ -271,7 +271,7 @@ def audit_page(path: Path, known_routes: set[str], origin: str) -> None:
 
     # --- landmarks and skip link -----------------------------------------
     if "main" not in page.landmarks:
-        fail(route, "no <main> landmark — the primary content region is unmarked")
+        fail(route, "no <main> landmark, the primary content region is unmarked")
     if page.landmarks.count("main") > 1:
         fail(route, "more than one <main> landmark")
     # The skip link is identified by pointing at the <main> element's id, not
@@ -454,7 +454,7 @@ def audit_soft_404() -> None:
         fail(
             "soft 404",
             "dist/404/index.html exists, so /404 is a crawlable URL that "
-            "answers 200 — only 404.html should be emitted",
+            "answers 200, only 404.html should be emitted",
         )
     if not (DIST / "404.html").exists():
         fail("404", "dist/404.html is missing; hosts have nothing to serve on 404")
@@ -513,7 +513,7 @@ def audit_robots(origin: str) -> None:
         # A preview deploy should block crawling outright; the pages already
         # carry noindex, and robots.txt is the belt to that braces.
         if not blocks_all:
-            fail("robots.txt", "preview build does not Disallow: / — previews must not be crawled")
+            fail("robots.txt", "preview build does not Disallow: /, previews must not be crawled")
         else:
             print("  robots.txt        preview build, crawling disallowed as intended")
         return
@@ -527,7 +527,7 @@ def audit_robots(origin: str) -> None:
 
 def main() -> int:
     if not DIST.exists():
-        print("dist/ not found — run `npm run build` first.")
+        print("dist/ not found, run `npm run build` first.")
         return 1
 
     pages = sorted(DIST.rglob("index.html")) + [DIST / "404.html"]

@@ -1,4 +1,4 @@
-import { photo, type Photo } from '../data/photos'
+import { photo } from '../data/photos'
 
 interface SitePhotoProps {
   /** Slot id from src/data/photos.ts, e.g. "home.story" or "svc.brake-repair-brampton.hero". */
@@ -43,22 +43,4 @@ export default function SitePhoto({
       className={className}
     />
   )
-}
-
-/**
- * Background-image value for the decorative backdrop behind hero copy.
- *
- * These backdrops render at 30–40% opacity beneath a full-bleed gradient, so
- * the extra detail in the 2x source is not perceptible — but the bytes are.
- * Serving the retina variant here cost 304 KB on every service page for an
- * image the visitor mostly cannot see, and because CSS backgrounds are found
- * only after the stylesheet is parsed, those bytes land in the middle of the
- * page's most latency-sensitive moment.
- *
- * The smallest prepared source is therefore used at every density. Use
- * `SitePhoto` instead wherever the image is actual content.
- */
-export function backgroundImageSet(p: Photo | undefined): string | undefined {
-  if (!p) return undefined
-  return `url("${p.sources[0]?.url ?? p.src}")`
 }

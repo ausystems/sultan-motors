@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
@@ -6,11 +6,23 @@ import ContactPage from './pages/ContactPage'
 import ServicePage from './pages/ServicePage'
 import NotFoundPage from './pages/NotFoundPage'
 import { serviceConfigs } from './data/services'
+import { enterPage } from './motion/transition'
 
-function ScrollToTop() {
+/**
+ * Resets scroll on navigation and settles the incoming page. The very first
+ * render is skipped: the hero's own entrance handles that, and the server
+ * rendered markup must not be touched before hydration completes.
+ */
+function RouteChange() {
   const { pathname } = useLocation()
+  const first = useRef(true)
   useEffect(() => {
     window.scrollTo(0, 0)
+    if (first.current) {
+      first.current = false
+      return
+    }
+    enterPage()
   }, [pathname])
   return null
 }
@@ -18,7 +30,7 @@ function ScrollToTop() {
 export default function App() {
   return (
     <>
-      <ScrollToTop />
+      <RouteChange />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about-us" element={<AboutPage />} />
@@ -40,11 +52,6 @@ export default function App() {
           path="/dent-repair-brampton"
           element={<Navigate to="/auto-body-repair-brampton" replace />}
         />
-        {/*
-          Unknown URLs render a real 404 page rather than redirecting home.
-          Redirecting every bad URL to `/` produces soft 404s, which Google
-          reports as errors and which hide broken inbound links.
-        */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>

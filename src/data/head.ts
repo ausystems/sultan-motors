@@ -23,7 +23,7 @@ export interface HeadModel {
  *
  * `Seo` applies this to the live DOM during client-side navigation, and the
  * prerenderer serialises the same model into each route's static HTML. Sharing
- * the builder is what keeps the crawled head and the hydrated head identical —
+ * the builder is what keeps the crawled head and the hydrated head identical,
  * when they diverge, search engines see one thing and users another.
  */
 export function buildHead(seo: SeoProps): HeadModel {
