@@ -102,7 +102,8 @@ that call, and restraint was the right one here.
 - The "15K vehicles serviced" and "100% certified" figures were removed. They
   could not be verified and the site should not carry claims it cannot back.
   "Since 2004" is grounded in the shop's founding year and stays.
-- The homepage capabilities marquee was removed as decoration.
+- The homepage capabilities strip was restored at the client's request, as a
+  CSS-only marquee that stops under reduced motion.
 - No em dashes appear in copy, comments or this file.
 
 ## Booking form

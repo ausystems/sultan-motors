@@ -214,7 +214,21 @@
 }
 
 /*
- * The one place uppercase is allowed: tiny numerals and index labels, used
+ * The homepage headline: capitals, set heavy and tight, at a size that
+ * scales from 3rem on a phone to 9.5rem on a wide desktop. Reserved for the
+ * opening; every other heading on the site is sentence case.
+ */
+@utility t-hero {
+  font-size: clamp(3rem, 1.4rem + 6.9vw, 9.5rem);
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/*
+ * Uppercase otherwise exists only for tiny numerals and index labels, used
  * sparingly. Never above a heading as a matter of habit.
  */
 @utility t-index {
@@ -354,3 +368,26 @@
   }
 }
 
+/*
+ * Homepage capabilities strip. Runs in CSS so it costs nothing on the main
+ * thread. The track renders its items twice, so -50% is one seamless loop.
+ */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-animate {
+  animation: marquee-scroll 48s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-animate {
+    animation: none;
+  }
+}

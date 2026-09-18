@@ -1,274 +1,285 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import SiteLink from './SiteLink'
-import Crossfade from './Crossfade'
+import { InstagramIcon, FacebookIcon, ArrowUpRightIcon, ChevronDownIcon } from './icons'
 import { serviceLinks } from '../data/links'
-import { business, openingHours } from '../data/site'
-import { ensureGsap, reducedMotion, ease } from '../motion/gsap'
-import { useMediaQuery } from '../motion/useMediaQuery'
+import { socialProfiles } from '../data/site'
 
-const primaryLinks = [
+const primary = [
   { label: 'Home', to: '/', exact: true },
   { label: 'About', to: '/about-us' },
-  { label: 'Book an appointment', to: '/contact' },
+  { label: 'Contact', to: '/contact' },
 ]
 
 /**
- * A persistent bar that stays out of the way, and a full-screen index when
- * asked for.
+ * The floating pill. A white capsule inset from the edges, with the wordmark,
+ * the four primary destinations, the social marks and the action, sitting
+ * over each page's dark opening. It tightens slightly once the visitor
+ * scrolls. "Services" opens a two-column index of every service page on
+ * hover or click; on narrow screens the same index lives in a panel under
+ * the capsule. Escape and a click outside close either.
  *
- * The bar is transparent over each page's dark opening and gains a near-solid
- * ink field once the visitor scrolls. It is a flat tint, not a backdrop blur:
- * nothing on the site may blur a photograph, including one passing under it. The menu lists every route on the site
- * at once: three primary destinations and the twelve services, numbered, with
- * the hovered service's photograph shown alongside on wide screens. Escape
- * closes it, focus is returned to the button that opened it, and the page
- * behind it does not scroll while it is open.
+ * The social marks render only when a profile URL is configured in
+ * src/data/site.ts, so an unconfigured profile never ships as a dead link.
  */
 export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
-  const [open, setOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [servicesOpen, setServicesOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [preview, setPreview] = useState<string>('home.visit')
   const { pathname } = useLocation()
-  const menuButton = useRef<HTMLButtonElement>(null)
-  const dialog = useRef<HTMLDivElement>(null)
-  const wide = useMediaQuery('(min-width: 1024px)')
+  const root = useRef<HTMLDivElement>(null)
+  const closeTimer = useRef<number | null>(null)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
+    const onScroll = () => setScrolled(window.scrollY > 40)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Route change always closes the menu.
+  // A route change always closes everything.
   useEffect(() => {
-    setOpen(false)
+    setMenuOpen(false)
+    setServicesOpen(false)
   }, [pathname])
 
-  // Scroll lock, focus management, and the entrance while open.
+  // Escape, or a click anywhere outside the capsule, closes what is open.
   useEffect(() => {
-    if (!open) return
-    // Captured once: by the time the cleanup runs these refs may point elsewhere.
-    const opener = menuButton.current
-    const panel = dialog.current
-    const previous = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    panel?.querySelector<HTMLElement>('[data-menu-close]')?.focus()
-
-    if (!reducedMotion() && panel) {
-      const gsap = ensureGsap()
-      const ctx = gsap.context(() => {
-        gsap.from('[data-menu-item]', {
-          y: 26,
-          opacity: 0,
-          duration: 0.9,
-          ease: ease.out,
-          stagger: 0.035,
-          delay: 0.05,
-        })
-        gsap.from('[data-menu-media]', {
-          clipPath: 'inset(0 0 100% 0)',
-          duration: 1.2,
-          ease: ease.out,
-          delay: 0.15,
-        })
-      }, panel)
-      return () => {
-        ctx.revert()
-        document.body.style.overflow = previous
-        opener?.focus()
+    if (!menuOpen && !servicesOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+        setServicesOpen(false)
       }
     }
+    const onClick = (e: MouseEvent) => {
+      if (root.current && !root.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+        setServicesOpen(false)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onClick)
     return () => {
-      document.body.style.overflow = previous
-      opener?.focus()
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onClick)
     }
-  }, [open])
+  }, [menuOpen, servicesOpen])
 
-  const onDialogKey = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      setOpen(false)
-      return
-    }
-    if (e.key !== 'Tab' || !dialog.current) return
-    const focusable = dialog.current.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled])',
-    )
-    if (!focusable.length) return
-    const first = focusable[0]
-    const last = focusable[focusable.length - 1]
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault()
-      last.focus()
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault()
-      first.focus()
-    }
+  const openServices = () => {
+    if (closeTimer.current) window.clearTimeout(closeTimer.current)
+    setServicesOpen(true)
   }
+  const closeServicesSoon = () => {
+    closeTimer.current = window.setTimeout(() => setServicesOpen(false), 160)
+  }
+
+  const socials = [
+    { href: socialProfiles.instagram, label: 'Instagram', Icon: InstagramIcon },
+    { href: socialProfiles.facebook, label: 'Facebook', Icon: FacebookIcon },
+  ].filter((s) => s.href)
 
   return (
     <>
-      {/* Reserves the bar's height so page content starts below it. */}
-      <div className="h-16 md:h-[4.5rem]" aria-hidden="true" />
+      {/* Reserves the capsule's height plus its inset so content starts below it. */}
+      <div className="h-[5.25rem] sm:h-24" aria-hidden="true" />
 
-      <header
-        className={`fixed inset-x-0 top-0 z-50 text-paper transition-[background-color,box-shadow] duration-500 ${
-          scrolled && !open
-            ? 'bg-ink/90 shadow-[0_1px_0_0_rgba(255,255,255,0.08)]'
-            : 'bg-transparent'
+      <div
+        ref={root}
+        className={`fixed inset-x-0 top-0 z-50 transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          scrolled ? 'px-3 pt-2 sm:px-6 sm:pt-3' : 'px-3 pt-3 sm:px-4 sm:pt-4'
         }`}
       >
-        <div className="wrap flex h-16 items-center justify-between md:h-[4.5rem]">
+        <nav
+          aria-label="Primary"
+          className={`mx-auto flex items-center justify-between rounded-full bg-paper text-ink shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] ring-1 ring-ink/5 transition-[max-width,padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            scrolled ? 'max-w-4xl px-3 py-2 sm:px-4' : 'max-w-7xl px-4 py-2.5 sm:px-6 sm:py-3'
+          }`}
+        >
           <SiteLink
             to="/"
             exact
-            className="t-index text-[12px] font-semibold tracking-[0.2em] text-paper"
             aria-label="Sultan Motors, home"
+            className="t-index shrink-0 text-[12px] font-bold tracking-[0.2em] text-ink"
           >
             Sultan Motors
           </SiteLink>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <a
-              href={`tel:${business.phoneRaw}`}
-              className="link-ul t-small hidden text-paper/80 hover:text-paper md:inline"
+          <ul className="hidden items-center gap-7 text-[14px] font-medium text-ink/65 lg:flex xl:gap-9">
+            <li>
+              <SiteLink to="/" exact activeClassName="text-ink" className="transition-colors hover:text-ink">
+                Home
+              </SiteLink>
+            </li>
+            <li
+              className="relative"
+              onMouseEnter={openServices}
+              onMouseLeave={closeServicesSoon}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) setServicesOpen(false)
+              }}
             >
-              {business.phoneDisplay}
-            </a>
-            <SiteLink to="/contact" className="btn btn-accent !h-10 !px-5 text-sm">
-              Book
+              <button
+                type="button"
+                onClick={() => setServicesOpen((o) => !o)}
+                aria-expanded={servicesOpen}
+                aria-controls="services-menu"
+                className={`flex items-center gap-1.5 transition-colors hover:text-ink ${
+                  pathname.endsWith('-brampton') ? 'text-ink' : ''
+                }`}
+              >
+                Services
+                <ChevronDownIcon
+                  className={`h-3.5 w-3.5 transition-transform duration-300 ${servicesOpen ? 'rotate-180' : ''}`}
+                  strokeWidth={2.5}
+                />
+              </button>
+              {servicesOpen && (
+                <div
+                  id="services-menu"
+                  className="absolute left-1/2 top-full z-40 mt-4 w-[34rem] -translate-x-1/2 rounded-2xl bg-paper p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] ring-1 ring-ink/5"
+                >
+                  <ol className="grid grid-cols-2 gap-x-2">
+                    {serviceLinks.map((link, i) => (
+                      <li key={link.to}>
+                        <SiteLink
+                          to={link.to}
+                          onClick={() => setServicesOpen(false)}
+                          className="group flex items-baseline gap-3 rounded-xl px-3 py-2.5 text-[13.5px] text-ink/80 transition-colors hover:bg-paper-2 hover:text-ink"
+                        >
+                          <span className="t-index tnum text-[10px] text-mute-2">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          {link.label.replace(' Brampton', '')}
+                        </SiteLink>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </li>
+            {primary.slice(1).map((link) => (
+              <li key={link.to}>
+                <SiteLink to={link.to} activeClassName="text-ink" className="transition-colors hover:text-ink">
+                  {link.label}
+                </SiteLink>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            {socials.map(({ href, label, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={label}
+                className="hidden h-9 w-9 items-center justify-center rounded-full text-ink/65 transition-colors hover:text-ink sm:inline-flex"
+              >
+                <Icon className="h-[18px] w-[18px]" />
+              </a>
+            ))}
+            <SiteLink to="/contact" className="btn btn-ink !h-10 !px-4 text-[13px] sm:!px-5">
+              <span className="hidden sm:inline">Get in touch</span>
+              <span className="sm:hidden">Book</span>
+              <ArrowUpRightIcon className="arrow h-4 w-4" />
             </SiteLink>
             <button
-              ref={menuButton}
               type="button"
-              onClick={() => setOpen((o) => !o)}
-              aria-expanded={open}
-              aria-controls="site-menu"
-              className="group flex h-10 items-center gap-2.5 rounded-full px-2 text-sm font-medium text-paper"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setMenuOpen((o) => !o)}
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper-2 lg:hidden"
             >
-              <span>Menu</span>
-              <span aria-hidden="true" className="flex w-5 flex-col gap-[5px]">
-                <span className="block h-px w-full bg-current transition-transform duration-500 group-hover:translate-x-0.5" />
-                <span className="block h-px w-full bg-current transition-transform duration-500 group-hover:-translate-x-0.5" />
+              <span aria-hidden="true" className="flex w-4 flex-col gap-[4px]">
+                <span
+                  className={`block h-[2px] w-full bg-ink transition-transform duration-300 ${
+                    menuOpen ? 'translate-y-[6px] rotate-45' : ''
+                  }`}
+                />
+                <span className={`block h-[2px] w-full bg-ink transition-opacity ${menuOpen ? 'opacity-0' : ''}`} />
+                <span
+                  className={`block h-[2px] w-full bg-ink transition-transform duration-300 ${
+                    menuOpen ? '-translate-y-[6px] -rotate-45' : ''
+                  }`}
+                />
               </span>
             </button>
           </div>
-        </div>
-      </header>
+        </nav>
 
-      {open && (
-        <div
-          id="site-menu"
-          ref={dialog}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Site menu"
-          onKeyDown={onDialogKey}
-          className="fixed inset-0 z-[60] overflow-y-auto bg-ink text-paper"
-        >
-          <div className="wrap flex h-16 items-center justify-between md:h-[4.5rem]">
-            <span className="t-index text-[12px] font-semibold tracking-[0.2em]">Sultan Motors</span>
-            <button
-              type="button"
-              data-menu-close
-              onClick={() => setOpen(false)}
-              className="group flex h-10 items-center gap-2.5 rounded-full px-2 text-sm font-medium"
-            >
-              <span>Close</span>
-              <span aria-hidden="true" className="relative block h-5 w-5">
-                <span className="absolute left-0 top-1/2 h-px w-full rotate-45 bg-current" />
-                <span className="absolute left-0 top-1/2 h-px w-full -rotate-45 bg-current" />
-              </span>
-            </button>
-          </div>
-
-          <div className="wrap grid-12 gap-y-14 pb-16 pt-8 md:pt-12 lg:min-h-[calc(100vh-4.5rem)] lg:pb-12">
-            <nav className="col-span-12 lg:col-span-7" aria-label="Primary">
-              <ul className="flex flex-col">
-                {primaryLinks.map((link) => (
-                  <li key={link.to} data-menu-item className="rule-dark">
-                    <SiteLink
-                      to={link.to}
-                      exact={link.exact}
-                      onClick={() => setOpen(false)}
-                      onMouseEnter={() => setPreview('home.visit')}
-                      className="group flex items-baseline justify-between py-4 md:py-5"
-                    >
-                      <span className="t-h2 font-medium transition-colors duration-300 group-hover:text-accent">
-                        {link.label}
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        className="t-small text-paper/40 transition-transform duration-500 group-hover:translate-x-1"
-                      >
-                        →
-                      </span>
-                    </SiteLink>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-12 md:mt-16">
-                <p data-menu-item className="t-index text-paper/50">
+        {menuOpen && (
+          <div
+            id="mobile-menu"
+            className="mx-auto mt-2 max-h-[calc(100dvh-7rem)] max-w-7xl overflow-y-auto rounded-2xl bg-paper p-3 text-ink shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] ring-1 ring-ink/5 lg:hidden"
+          >
+            <ul className="flex flex-col gap-0.5 text-[15px] font-medium">
+              <li>
+                <SiteLink to="/" exact onClick={() => setMenuOpen(false)} className="block rounded-xl px-3 py-2.5 hover:bg-paper-2">
+                  Home
+                </SiteLink>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setServicesOpen((o) => !o)}
+                  aria-expanded={servicesOpen}
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left hover:bg-paper-2"
+                >
                   Services
-                </p>
-                <ol className="mt-5 grid gap-x-10 sm:grid-cols-2">
-                  {serviceLinks.map((link, i) => (
-                    <li key={link.to} data-menu-item>
-                      <SiteLink
-                        to={link.to}
-                        onClick={() => setOpen(false)}
-                        onMouseEnter={() => setPreview(`svc.${link.to.slice(1)}.hero`)}
-                        onFocus={() => setPreview(`svc.${link.to.slice(1)}.hero`)}
-                        className="group flex items-baseline gap-4 py-2"
-                      >
-                        <span className="t-index tnum w-7 shrink-0 text-paper/40">
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span className="link-ul text-[1.0625rem] leading-snug text-paper/85 transition-colors duration-300 group-hover:text-paper">
+                  <ChevronDownIcon
+                    className={`h-3.5 w-3.5 transition-transform duration-300 ${servicesOpen ? 'rotate-180' : ''}`}
+                    strokeWidth={2.5}
+                  />
+                </button>
+                {servicesOpen && (
+                  <ol className="mb-1 mt-1 flex flex-col gap-0.5 border-l border-ink/10 pl-3">
+                    {serviceLinks.map((link, i) => (
+                      <li key={link.to}>
+                        <SiteLink
+                          to={link.to}
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-baseline gap-3 rounded-lg px-2 py-1.5 text-[13.5px] text-ink/75 hover:bg-paper-2 hover:text-ink"
+                        >
+                          <span className="t-index tnum text-[10px] text-mute-2">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
                           {link.label.replace(' Brampton', '')}
-                        </span>
-                      </SiteLink>
-                    </li>
+                        </SiteLink>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </li>
+              {primary.slice(1).map((link) => (
+                <li key={link.to}>
+                  <SiteLink to={link.to} onClick={() => setMenuOpen(false)} className="block rounded-xl px-3 py-2.5 hover:bg-paper-2">
+                    {link.label}
+                  </SiteLink>
+                </li>
+              ))}
+              {socials.length > 0 && (
+                <li className="mt-2 flex gap-2 px-3 pt-2">
+                  {socials.map(({ href, label, Icon }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      aria-label={label}
+                      className="grid h-9 w-9 place-items-center rounded-full bg-paper-2 hover:bg-paper-3"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
                   ))}
-                </ol>
-              </div>
-
-              <address
-                data-menu-item
-                className="t-small mt-12 grid gap-1 not-italic text-paper/60 sm:grid-cols-2 md:mt-16"
-              >
-                <div>
-                  <p>{business.streetAddress}</p>
-                  <p>
-                    {business.addressLocality}, {business.addressRegion} {business.postalCode}
-                  </p>
-                </div>
-                <div>
-                  <a href={`tel:${business.phoneRaw}`} className="link-ul text-paper/85">
-                    {business.phoneDisplay}
-                  </a>
-                  {openingHours.map((block) => (
-                    <p key={block.label}>
-                      {block.label}: {block.display}
-                    </p>
-                  ))}
-                </div>
-              </address>
-            </nav>
-
-            {wide && (
-              <div className="col-span-5 col-start-8">
-                <div data-menu-media className="sticky top-8">
-                  <Crossfade slot={preview} sizes="40vw" className="aspect-[4/5] w-full bg-ink-3" />
-                </div>
-              </div>
-            )}
+                </li>
+              )}
+            </ul>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   )
 }

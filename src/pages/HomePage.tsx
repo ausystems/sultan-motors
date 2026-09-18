@@ -36,6 +36,20 @@ const serviceLines: Record<string, string> = {
   '/safety-standards-certificate-brampton': 'Ontario Safety Standards Certificate inspections and repairs.',
 }
 
+const marqueeItems = [
+  'Brakes',
+  'Maintenance',
+  'Bodywork',
+  'Collision',
+  'Paint',
+  'Suspension',
+  'Diagnostics',
+  'Engine repair',
+  'Electrical',
+  'Transmission',
+  'Safety certificates',
+]
+
 const process = [
   {
     title: 'Inspect',
@@ -74,15 +88,18 @@ export default function HomePage() {
       <Main>
         <div ref={page}>
           {/*
-            The opening. The photograph is the site's existing hero asset: the
-            shop, vehicles on the hoists. There is no hero video in this
-            project, so the still is the foundation and the type is set over it.
+            The opening: the photograph of the shop, the eyebrow, the headline
+            set large in capitals, and one action, with the capsule navigation
+            floating over it. The photograph is the site's existing hero asset;
+            there is no hero video in this project. The block is clipped with
+            rounded lower corners so it sits on the page as an object rather
+            than bleeding into the section beneath.
           */}
           <section
             ref={hero}
-            className="relative flex min-h-[100svh] flex-col bg-ink text-paper"
+            className="relative flex min-h-[100svh] flex-col overflow-hidden rounded-b-[1.75rem] bg-ink text-paper md:rounded-b-[2.75rem]"
           >
-            <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0">
               {/*
                 Art-directed sources. Phones get a 3:4 crop taken from the
                 full-resolution frame at the vehicles, so nothing is upscaled;
@@ -113,40 +130,52 @@ export default function HomePage() {
                   className="h-full w-full object-cover object-center"
                 />
               </picture>
-              <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-ink/20" />
+              <div className="absolute inset-0 bg-ink/45" />
+              <div className="absolute inset-0 bg-gradient-to-r from-ink/65 via-ink/30 to-ink/10" />
+              <div className="absolute inset-0 bg-gradient-to-b from-ink/35 via-transparent to-ink/55" />
             </div>
 
             <SiteNavbar theme="dark" />
 
-            <div className="wrap relative z-10 flex flex-1 flex-col justify-end pb-[clamp(2.5rem,7vh,6rem)] pt-16">
-              <div className="grid-12 items-end gap-y-8">
-                <h1 data-hero-title className="t-display col-span-12 max-w-[13ch] lg:col-span-9">
-                  Expert auto repair and collision service in Brampton
-                </h1>
-                <p
-                  data-hero-rest
-                  className="t-lead col-span-12 max-w-[44ch] text-paper/75 md:col-span-7 lg:col-span-5"
+            <div className="wrap relative z-10 flex flex-1 flex-col justify-center pb-[8vh] pt-4">
+              <p data-hero-rest className="t-index text-paper/80">
+                The craft and precision behind Sultan Motors
+              </p>
+              <h1 data-hero-title className="t-hero mt-7 max-w-[18ch] md:mt-9">
+                Auto repair and collision service in Brampton
+              </h1>
+              <div data-hero-rest className="mt-10 md:mt-14">
+                <SiteLink
+                  to="/contact"
+                  className="btn btn-accent !h-14 !px-8 text-base shadow-[0_18px_50px_-12px_rgba(230,255,61,0.45)]"
                 >
-                  Diagnostics, engine and brake work, bodywork and paint, handled in one bay by
-                  licensed technicians since {business.foundingYear}.
-                </p>
-                <div
-                  data-hero-rest
-                  className="col-span-12 flex flex-wrap items-center gap-x-8 gap-y-4 md:col-span-5 lg:col-span-7 lg:justify-end"
-                >
-                  <SiteLink to="/contact" className="btn btn-accent">
-                    Book an appointment
-                    <span className="arrow" aria-hidden="true">
-                      ↗
-                    </span>
-                  </SiteLink>
-                  <a href={`tel:${business.phoneRaw}`} className="link-ul text-paper/80 hover:text-paper">
-                    or call {business.phoneDisplay}
-                  </a>
-                </div>
+                  Book an appointment
+                </SiteLink>
               </div>
             </div>
           </section>
+
+          {/*
+            The capabilities strip: the shop's work, set large in capitals and
+            moving slowly. It runs in CSS, costs nothing on the main thread,
+            and stops entirely under reduced motion. The second pass exists
+            only to make the loop seamless and is hidden from assistive tech.
+          */}
+          <div className="overflow-hidden border-b border-ink/10 bg-paper py-5 md:py-7">
+            <div className="marquee-animate flex w-max gap-12 whitespace-nowrap text-3xl font-extrabold uppercase leading-none tracking-[-0.02em] text-ink sm:gap-16 sm:text-4xl md:text-5xl lg:text-6xl">
+              {[0, 1].map((pass) => (
+                <div
+                  key={pass}
+                  className="flex items-center gap-12 sm:gap-16"
+                  aria-hidden={pass > 0 ? 'true' : undefined}
+                >
+                  {marqueeItems.map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* A single statement, set large, with room around it. */}
           <section className="section-y">
