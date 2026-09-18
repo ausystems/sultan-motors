@@ -31,6 +31,41 @@ function fail(message) {
   process.exit(1)
 }
 
+/*
+ * Routes are code-split, so each page's component lives in its own chunk that
+ * the entry imports on demand. Left alone, that chunk (and the motion chunk it
+ * depends on) would only start loading after the entry had run, a round trip
+ * or two after the HTML. Vite's manifest lists the chunks behind each source
+ * module, so every route's HTML can preload exactly the ones it will need.
+ */
+const manifest = JSON.parse(
+  await readFile(join(DIST, '.vite', 'manifest.json'), 'utf8').catch(() => '{}'),
+)
+
+function chunkFilesFor(key, seen = new Set()) {
+  const entry = manifest[key]
+  if (!entry || seen.has(key)) return []
+  seen.add(key)
+  return [entry.file, ...(entry.imports ?? []).flatMap((k) => chunkFilesFor(k, seen))]
+}
+
+const entryFiles = new Set(chunkFilesFor('index.html'))
+
+function pageModuleFor(path) {
+  if (path === '/') return 'src/pages/HomePage.tsx'
+  if (path === '/about-us') return 'src/pages/AboutPage.tsx'
+  if (path === '/contact') return 'src/pages/ContactPage.tsx'
+  if (path === '/404') return 'src/pages/NotFoundPage.tsx'
+  return 'src/pages/ServicePage.tsx'
+}
+
+function modulePreloadsFor(path) {
+  return chunkFilesFor(pageModuleFor(path))
+    .filter((file) => !entryFiles.has(file))
+    .map((file) => `<link rel="modulepreload" href="/${file}" />`)
+    .join('\n    ')
+}
+
 const template = await readFile(join(DIST, 'index.html'), 'utf8').catch(() =>
   fail('dist/index.html not found, run `vite build` first'),
 )
@@ -64,11 +99,16 @@ for (const path of routes) {
     fail(`rendering ${path} threw: ${error.stack ?? error.message}`)
   }
 
+  // The route's own chunks, preloaded from the head so they arrive with the
+  // entry rather than one round trip after it has run.
+  const preloads = modulePreloadsFor(path)
+  const head = preloads ? `${rendered.head}\n    ${preloads}` : rendered.head
+
   const headStart = template.indexOf(HEAD_OPEN)
   const headEnd = template.indexOf(HEAD_CLOSE) + HEAD_CLOSE.length
   const page = (
     template.slice(0, headStart) +
-    rendered.head +
+    head +
     template.slice(headEnd)
   ).replace(APP_MARKER, rendered.html)
 

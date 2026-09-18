@@ -94,6 +94,28 @@ would cost roughly 150 KB of script and real GPU time on phones for an effect
 that a still photograph under the type does not need. The brief allows exactly
 that call, and restraint was the right one here.
 
+### Delivery
+
+- **Routes are code-split.** Each page is its own chunk (`src/pages/lazy.ts`);
+  the server renders from static imports (`entry-server.tsx`) and the client
+  hydrates the prerendered HTML in place, keeping it on screen until the
+  route's chunk arrives. Links warm the next route's chunk on hover, focus and
+  touch, and navigate inside a React transition so the current page never
+  gives way to a blank fallback. The prerenderer reads Vite's manifest and
+  emits a `modulepreload` for exactly the chunks each route needs, so a split
+  route still loads alongside the entry.
+- **Google Maps is a facade** (`MapEmbed.tsx`). The address renders as text
+  with "Show map" and "Open in Google Maps"; nothing from Google loads until
+  someone asks, which keeps well over a megabyte of third-party script off
+  every page.
+- **The fallback face is metric-matched to Geist** (`Geist Fallback` in
+  `index.css`: size-adjust 102.56%, ascent 100.5%, descent 29.5%), so a slow
+  connection that paints before the font arrives does not shift the page when
+  it swaps in.
+- Touch targets are at least 44px, the smallest text is 12px, the document
+  language is `en-CA` to match the declared locale, and fixed chrome honours a
+  phone's safe area when the site is installed to the home screen.
+
 ### Decisions worth knowing
 
 - **There is no hero video.** The original build never had one; the hero is a

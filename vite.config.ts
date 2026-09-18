@@ -49,6 +49,9 @@ export default defineConfig(() => {
       'import.meta.env.VITE_NOINDEX': JSON.stringify(noindex),
     },
     build: {
+      // The prerenderer reads this to emit a modulepreload for each route's
+      // own chunks, so a split route still arrives with the entry.
+      manifest: true,
       // Photos are already optimised WebP; inlining them as base64 would bloat
       // the JS bundle and make them uncacheable.
       assetsInlineLimit: 0,

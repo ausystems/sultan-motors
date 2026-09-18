@@ -16,7 +16,7 @@ export default function Breadcrumbs({ trail, theme = 'dark', className = '' }: B
   const strong = theme === 'dark' ? 'text-paper' : 'text-ink'
   return (
     <nav aria-label="Breadcrumb" className={`t-small ${className}`}>
-      <ol className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+      <ol className="flex flex-wrap items-center gap-x-2.5">
         {trail.map((crumb, i) => {
           const last = i === trail.length - 1
           return (
@@ -26,8 +26,12 @@ export default function Breadcrumbs({ trail, theme = 'dark', className = '' }: B
                   {crumb.label}
                 </span>
               ) : (
-                <SiteLink to={crumb.to} exact className={`link-ul ${mute} hover:${strong}`}>
-                  {crumb.label}
+                <SiteLink
+                  to={crumb.to}
+                  exact
+                  className={`group inline-flex min-h-11 items-center ${mute} hover:${strong}`}
+                >
+                  <span className="link-ul">{crumb.label}</span>
                 </SiteLink>
               )}
               {!last && (

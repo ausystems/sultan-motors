@@ -3,6 +3,7 @@ import SiteLink from '../components/SiteLink'
 import SiteNavbar from '../components/SiteNavbar'
 import SiteFooter from '../components/SiteFooter'
 import Seo from '../components/Seo'
+import MapEmbed from '../components/MapEmbed'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { SkipToContent, Main } from '../components/PageShell'
 import SitePhoto from '../components/SitePhoto'
@@ -88,8 +89,8 @@ export default function ServicePage({ config }: { config: ServiceConfig }) {
                       ↗
                     </span>
                   </SiteLink>
-                  <a href={`tel:${business.phoneRaw}`} className="link-ul text-paper/80 hover:text-paper">
-                    or call {business.phoneDisplay}
+                  <a href={`tel:${business.phoneRaw}`} className="group inline-flex min-h-11 items-center text-paper/80 hover:text-paper">
+                    <span className="link-ul">or call {business.phoneDisplay}</span>
                   </a>
                 </div>
               </div>
@@ -462,13 +463,7 @@ export default function ServicePage({ config }: { config: ServiceConfig }) {
                 {business.streetAddress}, {business.addressLocality}.
               </h2>
               <div data-reveal className="mt-10 overflow-hidden bg-paper-3">
-                <iframe
-                  title="Sultan Motors location map"
-                  src="https://maps.google.com/maps?q=5%20Melanie%20Dr%20Unit%202%20Brampton%20ON%20L6T%204K8&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                  loading="lazy"
-                  className="h-[320px] w-full grayscale sm:h-[420px] md:h-[520px]"
-                  style={{ border: 0 }}
-                />
+                <MapEmbed tone="light" />
               </div>
             </div>
           </section>

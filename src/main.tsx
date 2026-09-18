@@ -3,25 +3,23 @@ import { createRoot, hydrateRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App'
+import { lazyPages } from './pages/lazy'
 
 const container = document.getElementById('root')!
-
 const tree = (
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <App pages={lazyPages} />
     </BrowserRouter>
   </StrictMode>
 )
 
-// Production pages ship prerendered markup (see scripts/prerender.mjs), so
-// hydrate over it instead of throwing it away and painting again.
-//
-// The test is firstElementChild, not hasChildNodes: the dev server serves the
-// template's literal `<div id="root"><!--app-html--></div>`, and a comment
-// counts as a child node. Checking for any child would make dev try to hydrate
-// against markup that is not there.
-if (container.firstElementChild) {
+/*
+ * The production build ships prerendered HTML in #root, which React hydrates
+ * in place. The dev server serves the bare template with an empty #root, and
+ * hydrating nothing would only produce mismatch warnings, so it renders fresh.
+ */
+if (container.hasChildNodes()) {
   hydrateRoot(container, tree)
 } else {
   createRoot(container).render(tree)

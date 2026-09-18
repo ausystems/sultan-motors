@@ -1,6 +1,7 @@
-import type { ComponentProps, MouseEvent } from 'react'
+import { startTransition, type ComponentProps, type MouseEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { leavePage } from '../motion/transition'
+import { preloadForPath } from '../pages/lazy'
 
 interface SiteLinkProps extends ComponentProps<typeof Link> {
   to: string
@@ -25,6 +26,7 @@ export default function SiteLink({
   onClick,
   ...rest
 }: SiteLinkProps) {
+  const { onMouseEnter: _me, onFocus: _f, onTouchStart: _ts, ...restWithoutHandlers } = rest
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const active =
@@ -38,8 +40,13 @@ export default function SiteLink({
     const target = to.split('#')[0]
     if (target === pathname) return
     e.preventDefault()
-    void leavePage().then(() => navigate(to))
+    preloadForPath(to)
+    // A transition keeps the current page on screen until the next route's
+    // chunk has loaded, instead of flashing the Suspense fallback.
+    void leavePage().then(() => startTransition(() => navigate(to)))
   }
+
+  const warm = () => preloadForPath(to)
 
   return (
     <Link
@@ -48,7 +55,19 @@ export default function SiteLink({
       data-status={active ? 'active' : undefined}
       aria-current={active ? 'page' : undefined}
       onClick={handleClick}
-      {...rest}
+      onMouseEnter={(e) => {
+        rest.onMouseEnter?.(e)
+        warm()
+      }}
+      onFocus={(e) => {
+        rest.onFocus?.(e)
+        warm()
+      }}
+      onTouchStart={(e) => {
+        rest.onTouchStart?.(e)
+        warm()
+      }}
+      {...restWithoutHandlers}
     >
       {children}
     </Link>

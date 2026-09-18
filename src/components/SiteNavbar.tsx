@@ -86,7 +86,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
 
       <div
         ref={root}
-        className={`fixed inset-x-0 top-0 z-50 transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`safe-top fixed inset-x-0 top-0 z-50 transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           scrolled ? 'px-3 pt-2 sm:px-6 sm:pt-3' : 'px-3 pt-3 sm:px-4 sm:pt-4'
         }`}
       >
@@ -100,7 +100,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
             to="/"
             exact
             aria-label="Sultan Motors, home"
-            className="t-index shrink-0 text-[12px] font-bold tracking-[0.2em] text-ink"
+            className="t-index inline-flex h-11 shrink-0 items-center text-[12px] font-bold tracking-[0.2em] text-ink"
           >
             Sultan Motors
           </SiteLink>
@@ -147,7 +147,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
                           onClick={() => setServicesOpen(false)}
                           className="group flex items-baseline gap-3 rounded-xl px-3 py-2.5 text-[13.5px] text-ink/80 transition-colors hover:bg-paper-2 hover:text-ink"
                         >
-                          <span className="t-index tnum text-[10px] text-mute-2">
+                          <span className="t-index tnum text-mute-2">
                             {String(i + 1).padStart(2, '0')}
                           </span>
                           {link.label.replace(' Brampton', '')}
@@ -180,7 +180,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
                 <Icon className="h-[18px] w-[18px]" />
               </a>
             ))}
-            <SiteLink to="/contact" className="btn btn-ink !h-10 !px-4 text-[13px] sm:!px-5">
+            <SiteLink to="/contact" className="btn btn-ink !h-11 !px-4 text-[13px] sm:!h-10 sm:!px-5">
               <span className="hidden sm:inline">Get in touch</span>
               <span className="sm:hidden">Book</span>
               <ArrowUpRightIcon className="arrow h-4 w-4" />
@@ -191,7 +191,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
               onClick={() => setMenuOpen((o) => !o)}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper-2 lg:hidden"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper-2 lg:hidden"
             >
               <span aria-hidden="true" className="flex w-4 flex-col gap-[4px]">
                 <span
@@ -217,7 +217,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
           >
             <ul className="flex flex-col gap-0.5 text-[15px] font-medium">
               <li>
-                <SiteLink to="/" exact onClick={() => setMenuOpen(false)} className="block rounded-xl px-3 py-2.5 hover:bg-paper-2">
+                <SiteLink to="/" exact onClick={() => setMenuOpen(false)} className="block min-h-11 rounded-xl px-3 py-3 hover:bg-paper-2">
                   Home
                 </SiteLink>
               </li>
@@ -226,7 +226,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
                   type="button"
                   onClick={() => setServicesOpen((o) => !o)}
                   aria-expanded={servicesOpen}
-                  className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left hover:bg-paper-2"
+                  className="flex min-h-11 w-full items-center justify-between rounded-xl px-3 py-3 text-left hover:bg-paper-2"
                 >
                   Services
                   <ChevronDownIcon
@@ -241,9 +241,9 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
                         <SiteLink
                           to={link.to}
                           onClick={() => setMenuOpen(false)}
-                          className="flex items-baseline gap-3 rounded-lg px-2 py-1.5 text-[13.5px] text-ink/75 hover:bg-paper-2 hover:text-ink"
+                          className="flex min-h-11 items-center gap-3 rounded-lg px-2 py-2 text-[14px] text-ink/75 hover:bg-paper-2 hover:text-ink"
                         >
-                          <span className="t-index tnum text-[10px] text-mute-2">
+                          <span className="t-index tnum text-mute-2">
                             {String(i + 1).padStart(2, '0')}
                           </span>
                           {link.label.replace(' Brampton', '')}
@@ -255,7 +255,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
               </li>
               {primary.slice(1).map((link) => (
                 <li key={link.to}>
-                  <SiteLink to={link.to} onClick={() => setMenuOpen(false)} className="block rounded-xl px-3 py-2.5 hover:bg-paper-2">
+                  <SiteLink to={link.to} onClick={() => setMenuOpen(false)} className="block min-h-11 rounded-xl px-3 py-3 hover:bg-paper-2">
                     {link.label}
                   </SiteLink>
                 </li>

@@ -21,13 +21,29 @@
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/*
+ * The fallback face, metric-matched to Geist so the swap does not move the
+ * page. On a slow connection the first paint uses this; when Geist arrives,
+ * line breaks and line heights are already where Geist will put them.
+ * size-adjust is the measured width ratio of Geist to Arial (102.56%); the
+ * vertical overrides are Geist's own hhea metrics (1005 / 295 / 0 per 1000).
+ */
+@font-face {
+  font-family: "Geist Fallback";
+  src: local("Arial"), local("Helvetica Neue"), local("Roboto");
+  size-adjust: 102.56%;
+  ascent-override: 100.5%;
+  descent-override: 29.5%;
+  line-gap-override: 0%;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Tokens                                                                      */
 /* -------------------------------------------------------------------------- */
 
 @theme {
-  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Geist Variable", "Geist Fallback", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* The verified palette: a near-black scale, a white scale, one accent. */
   --color-ink: #0d0e10;
@@ -62,7 +78,7 @@
   --text-body--line-height: 1.58;
   --text-small: 0.875rem;
   --text-small--line-height: 1.5;
-  --text-index: 0.6875rem;
+  --text-index: 0.75rem;
   --text-index--line-height: 1;
   --text-index--letter-spacing: 0.14em;
 
@@ -117,6 +133,11 @@
     max-width: 100%;
   }
 
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -152,6 +173,11 @@
 
 @utility section-y {
   padding-block: var(--spacing-section);
+}
+
+/* Keeps fixed chrome clear of a phone's notch when installed to the home screen. */
+@utility safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 @utility section-y-sm {

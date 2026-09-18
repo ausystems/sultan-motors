@@ -1,12 +1,15 @@
-import { useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef, type ComponentType } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import HomePage from './pages/HomePage'
-import AboutPage from './pages/AboutPage'
-import ContactPage from './pages/ContactPage'
-import ServicePage from './pages/ServicePage'
-import NotFoundPage from './pages/NotFoundPage'
-import { serviceConfigs } from './data/services'
+import { serviceConfigs, type ServiceConfig } from './data/services'
 import { enterPage } from './motion/transition'
+
+export interface PageModules {
+  Home: ComponentType
+  About: ComponentType
+  Contact: ComponentType
+  Service: ComponentType<{ config: ServiceConfig }>
+  NotFound: ComponentType
+}
 
 /**
  * Resets scroll on navigation and settles the incoming page. The very first
@@ -27,33 +30,41 @@ function RouteChange() {
   return null
 }
 
-export default function App() {
+/**
+ * The route table. `pages` is injected so the server can render from static
+ * imports while the client loads each route on demand; the tree is otherwise
+ * identical, which is what keeps hydration exact.
+ */
+export default function App({ pages }: { pages: PageModules }) {
+  const { Home, About, Contact, Service, NotFound } = pages
   return (
     <>
       <RouteChange />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/about-us" element={<AboutPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        {serviceConfigs.map((config) => (
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about-us" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          {serviceConfigs.map((config) => (
+            <Route
+              key={config.slug}
+              path={`/${config.slug}`}
+              element={<Service config={config} />}
+            />
+          ))}
+          {/*
+            Dent repair was retired; the auto body repair page carries that
+            content. The real 301 comes from the generated dist/_redirects (see
+            redirectsFile in entry-server.tsx) and from vercel.json. This route
+            only covers in-app navigation to the old path.
+          */}
           <Route
-            key={config.slug}
-            path={`/${config.slug}`}
-            element={<ServicePage config={config} />}
+            path="/dent-repair-brampton"
+            element={<Navigate to="/auto-body-repair-brampton" replace />}
           />
-        ))}
-        {/*
-          Dent repair was retired; the auto body repair page carries that
-          content. The real 301 comes from the generated dist/_redirects (see
-          redirectsFile in entry-server.tsx) and from vercel.json. This route
-          only covers in-app navigation to the old path.
-        */}
-        <Route
-          path="/dent-repair-brampton"
-          element={<Navigate to="/auto-body-repair-brampton" replace />}
-        />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </>
   )
 }

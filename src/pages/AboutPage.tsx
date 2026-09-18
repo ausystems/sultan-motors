@@ -272,9 +272,9 @@ export default function AboutPage() {
                     ↗
                   </span>
                 </SiteLink>
-                <a href={`tel:${business.phoneRaw}`} className="link-ul text-ink">
-                  or call {business.phoneDisplay}
-                </a>
+                <a href={`tel:${business.phoneRaw}`} className="group inline-flex min-h-11 items-center text-ink">
+                    <span className="link-ul">or call {business.phoneDisplay}</span>
+                  </a>
               </div>
             </div>
           </section>

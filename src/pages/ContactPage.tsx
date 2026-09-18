@@ -4,6 +4,7 @@ import { useSubmit } from '@formspree/react'
 import SiteNavbar from '../components/SiteNavbar'
 import SiteFooter from '../components/SiteFooter'
 import Seo from '../components/Seo'
+import MapEmbed from '../components/MapEmbed'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { SkipToContent, Main } from '../components/PageShell'
 import { pageSeo, breadcrumbTrails } from '../data/seo'
@@ -440,13 +441,7 @@ export default function ContactPage() {
                 </dl>
               </div>
               <div data-reveal className="mt-14 overflow-hidden bg-ink-3">
-                <iframe
-                  title="Sultan Motors location map"
-                  src="https://maps.google.com/maps?q=5%20Melanie%20Dr%20Unit%202%20Brampton%20ON%20L6T%204K8&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                  loading="lazy"
-                  className="h-[320px] w-full grayscale invert-[0.92] hue-rotate-180 sm:h-[420px] md:h-[520px]"
-                  style={{ border: 0 }}
-                />
+                <MapEmbed tone="dark" />
               </div>
             </div>
           </section>
@@ -659,7 +654,7 @@ function StepDateTime({ form, setField, errors, calMonth, setCalMonth, booked }:
                     setField('date', key)
                     setField('time', '')
                   }}
-                  className={`tnum aspect-square text-sm transition-colors duration-200 ${
+                  className={`tnum aspect-square min-h-11 text-sm transition-colors duration-200 ${
                     selected
                       ? 'bg-accent text-ink'
                       : disabled
@@ -702,7 +697,7 @@ function StepDateTime({ form, setField, errors, calMonth, setCalMonth, booked }:
                     disabled={taken}
                     aria-pressed={selected}
                     onClick={() => setField('time', slot)}
-                    className={`tnum border px-2 py-2.5 text-sm transition-colors duration-200 ${
+                    className={`tnum min-h-11 border px-2 py-2.5 text-sm transition-colors duration-200 ${
                       selected
                         ? 'border-accent bg-accent text-ink'
                         : taken

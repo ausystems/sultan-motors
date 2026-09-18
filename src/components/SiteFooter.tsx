@@ -38,9 +38,9 @@ export default function SiteFooter() {
             </p>
             <a
               href={`tel:${business.phoneRaw}`}
-              className="link-ul mt-5 inline-block text-paper/85 hover:text-paper"
+              className="group mt-3 inline-flex min-h-11 items-center text-paper/85 hover:text-paper"
             >
-              {business.phoneDisplay}
+              <span className="link-ul">{business.phoneDisplay}</span>
             </a>
             <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-paper/60">
               {openingHours.map((block) => (
@@ -56,14 +56,14 @@ export default function SiteFooter() {
 
           <nav className="col-span-12 sm:col-span-6 lg:col-span-6" aria-label="Services">
             <p className="t-index text-paper/45">Services</p>
-            <ol className="mt-5 grid gap-x-10 gap-y-2 sm:grid-cols-2">
+            <ol className="mt-4 grid gap-x-10 sm:grid-cols-2">
               {serviceLinks.map((link, i) => (
-                <li key={link.to} className="flex items-baseline gap-3">
+                <li key={link.to} className="flex min-h-11 items-center gap-3 py-1">
                   <span className="t-index tnum w-6 shrink-0 text-paper/35">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <SiteLink to={link.to} className="link-ul text-paper/85 hover:text-paper">
-                    {link.label.replace(' Brampton', '')}
+                  <SiteLink to={link.to} className="group flex min-h-11 items-center text-paper/85 hover:text-paper">
+                    <span className="link-ul">{link.label.replace(' Brampton', '')}</span>
                   </SiteLink>
                 </li>
               ))}
@@ -72,15 +72,15 @@ export default function SiteFooter() {
 
           <nav className="col-span-12 sm:col-span-6 lg:col-span-3" aria-label="Explore">
             <p className="t-index text-paper/45">Explore</p>
-            <ul className="mt-5 flex flex-col gap-2">
+            <ul className="mt-4 flex flex-col">
               {exploreLinks.map((link) => (
-                <li key={link.to}>
+                <li key={link.to} className="flex min-h-11 items-center py-1">
                   <SiteLink
                     to={link.to}
                     exact={link.to === '/'}
-                    className="link-ul text-paper/85 hover:text-paper"
+                    className="group flex min-h-11 items-center text-paper/85 hover:text-paper"
                   >
-                    {link.label}
+                    <span className="link-ul">{link.label}</span>
                   </SiteLink>
                 </li>
               ))}
@@ -99,9 +99,9 @@ export default function SiteFooter() {
               href="https://www.skyboundscaling.com"
               target="_blank"
               rel="noreferrer noopener"
-              className="link-ul text-paper/70 hover:text-paper"
+              className="group inline-flex min-h-11 items-center text-paper/70 hover:text-paper"
             >
-              Skybound Scaling
+              <span className="link-ul">Skybound Scaling</span>
             </a>
           </p>
         </div>

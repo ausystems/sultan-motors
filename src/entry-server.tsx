@@ -2,7 +2,21 @@ import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 // React Router 7 ships StaticRouter from the core package, not react-router-dom/server.
 import { StaticRouter } from 'react-router'
-import App from './App'
+import App, { type PageModules } from './App'
+import HomePage from './pages/HomePage'
+import AboutPage from './pages/AboutPage'
+import ContactPage from './pages/ContactPage'
+import ServicePage from './pages/ServicePage'
+import NotFoundPage from './pages/NotFoundPage'
+
+/** The server renders from static imports; nothing suspends, nothing is lazy. */
+const staticPages: PageModules = {
+  Home: HomePage,
+  About: AboutPage,
+  Contact: ContactPage,
+  Service: ServicePage,
+  NotFound: NotFoundPage,
+}
 import { buildHead, renderHeadHtml } from './data/head'
 import { pageSeo, notFoundSeo, indexableRoutes } from './data/seo'
 import { SITE_URL, SITE_NAME, SITE_NOINDEX, absoluteUrl } from './data/site'
@@ -65,7 +79,7 @@ export function renderRoute(path: string): RenderedRoute {
   const rendered = renderToString(
     <StrictMode>
       <StaticRouter location={path}>
-        <App />
+        <App pages={staticPages} />
       </StaticRouter>
     </StrictMode>,
   )

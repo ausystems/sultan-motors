@@ -103,6 +103,13 @@ export const openingHours = [
   },
 ]
 
+/** A Google Maps search for the shop, for the map facade and the `hasMap` property. */
+export const mapsQuery = encodeURIComponent(
+  `${business.streetAddress} ${business.addressLocality} ${business.addressRegion} ${business.postalCode}`,
+)
+export const mapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`
+export const mapsEmbedUrl = `https://maps.google.com/maps?q=${mapsQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`
+
 /** Absolute URL for a site path. `absoluteUrl('/')` returns the bare origin. */
 export function absoluteUrl(path: string): string {
   if (/^https?:\/\//.test(path)) return path
@@ -180,6 +187,7 @@ export const businessSchema = {
   },
   openingHoursSpecification: openingHoursSchema,
   areaServed: business.areaServed.map((name) => ({ '@type': 'City', name })),
+  hasMap: mapsSearchUrl,
   ...(sameAs.length ? { sameAs } : {}),
 } as const
 

@@ -3,6 +3,7 @@ import SiteNavbar from '../components/SiteNavbar'
 import SiteFooter from '../components/SiteFooter'
 import SiteLink from '../components/SiteLink'
 import Seo from '../components/Seo'
+import MapEmbed from '../components/MapEmbed'
 import SitePhoto from '../components/SitePhoto'
 import Crossfade from '../components/Crossfade'
 import { SkipToContent, Main } from '../components/PageShell'
@@ -325,9 +326,9 @@ export default function HomePage() {
                 <SiteLink
                   data-reveal
                   to="/about-us"
-                  className="link-ul mt-10 inline-block font-medium"
+                  className="group mt-8 inline-flex min-h-11 items-center font-medium"
                 >
-                  About the shop
+                  <span className="link-ul">About the shop</span>
                 </SiteLink>
               </div>
             </div>
@@ -361,13 +362,7 @@ export default function HomePage() {
                 </dl>
               </div>
               <div data-reveal className="mt-14 overflow-hidden bg-paper-3">
-                <iframe
-                  title="Sultan Motors location map"
-                  src="https://maps.google.com/maps?q=5%20Melanie%20Dr%20Unit%202%20Brampton%20ON%20L6T%204K8&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                  loading="lazy"
-                  className="h-[320px] w-full grayscale sm:h-[420px] md:h-[520px]"
-                  style={{ border: 0 }}
-                />
+                <MapEmbed tone="light" />
               </div>
             </div>
           </section>

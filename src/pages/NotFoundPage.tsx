@@ -46,9 +46,9 @@ export default function NotFoundPage() {
                 <SiteLink to="/" className="btn btn-accent">
                   Back to the homepage
                 </SiteLink>
-                <a href={`tel:${business.phoneRaw}`} className="link-ul text-paper/80 hover:text-paper">
-                  or call {business.phoneDisplay}
-                </a>
+                <a href={`tel:${business.phoneRaw}`} className="group inline-flex min-h-11 items-center text-paper/80 hover:text-paper">
+                    <span className="link-ul">or call {business.phoneDisplay}</span>
+                  </a>
               </div>
             </div>
           </section>
