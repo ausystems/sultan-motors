@@ -339,6 +339,18 @@
   .btn:active {
     transform: translateY(1px) scale(0.995);
   }
+  /*
+   * A finger needs 44px; a cursor does not. Compact variants of the button
+   * exist so the capsule navigation can stay slim on a wide screen, and on a
+   * mouse-driven display that is the right call. Where the pointer is coarse,
+   * the floor comes back. min-height is used rather than height so it clamps
+   * a utility that set an explicit height, however that utility was written.
+   */
+  @media (pointer: coarse) {
+    .btn {
+      min-height: 2.75rem;
+    }
+  }
   .btn-accent {
     background-color: var(--color-accent);
     color: var(--color-ink);

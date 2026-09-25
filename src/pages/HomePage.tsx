@@ -45,26 +45,31 @@ const marqueeItems = [
   'Safety certificates',
 ]
 
+/*
+ * The five stages of a job, one sentence each. Kept this short on purpose:
+ * what a visitor needs from this section is the shape of the sequence, and a
+ * paragraph per stage buries that under four screens of scrolling.
+ */
 const process = [
   {
     title: 'Inspect',
-    copy: 'A full walk around and multi point check establishes the real condition of the vehicle before anyone talks about a fix.',
+    copy: 'A walk around and a multi point check, before anything is quoted.',
   },
   {
     title: 'Diagnose',
-    copy: 'Scan tools, live data and hands on testing isolate the cause. The symptom is where we start, not where we stop.',
+    copy: 'Scan tools and live data isolate the cause, not the symptom.',
   },
   {
     title: 'Quote',
-    copy: 'A written estimate with parts, labour and a timeline. Nothing is approved until you approve it.',
+    copy: 'Parts, labour and a timeline in writing. Nothing starts unapproved.',
   },
   {
     title: 'Repair',
-    copy: 'The work is done to manufacturer torque and clearance specifications with OEM quality parts.',
+    copy: 'Manufacturer torque and clearance specs, OEM quality parts.',
   },
   {
     title: 'Deliver',
-    copy: 'A final quality check, a road test and a clear explanation of what was fixed and what to watch.',
+    copy: 'A final check, a road test and a plain account of the work.',
   },
 ]
 
@@ -178,7 +183,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* A single statement, set large, with room around it. */}
+          {/*
+            A single statement, set large, with room around it. It assembles
+            letter by letter the moment it reaches the viewport, which is the
+            one place on the page where the motion is the content.
+          */}
           <section className="section-y">
             <div className="wrap grid-12 gap-y-10">
               <p data-reveal className="t-index col-span-12 text-mute lg:col-span-3">
@@ -187,7 +196,7 @@ export default function HomePage() {
                 {business.addressLocality}, Ontario
               </p>
               <p
-                data-reveal
+                data-reveal="chars"
                 className="t-h2 col-span-12 max-w-[24ch] font-medium lg:col-span-9"
               >
                 A shop built on one idea: trust the diagnosis, understand the repair, and drive
@@ -265,33 +274,38 @@ export default function HomePage() {
               <SitePhoto
                 slot="home.story"
                 sizes="100vw"
-                className="h-[62svh] w-full object-cover object-center md:h-[86svh]"
+                className="h-[46svh] w-full object-cover object-center md:h-[66svh]"
               />
             </div>
             <p className="wrap t-small mt-4 text-mute">The collision bay, Melanie Drive.</p>
           </section>
 
-          {/* The process, as a vertical sequence rather than a row of cards. */}
-          <section className="section-y">
-            <div className="wrap grid-12 gap-y-12">
-              <div className="col-span-12 lg:col-span-4">
-                <h2 data-reveal className="t-h2 max-w-[10ch] lg:sticky lg:top-28">
-                  How a repair moves through the shop
-                </h2>
-              </div>
-              <ol className="col-span-12 lg:col-span-7 lg:col-start-6" data-reveal data-reveal-group>
+          {/*
+            The process, set as an index rather than a stack of cards or
+            paragraphs. From md up each stage is a single ruled line: number,
+            stage, one sentence, so the whole sequence is legible at a glance
+            and the section occupies a third of the height it used to. The
+            heading sits at h3 scale on purpose; this is the supporting note
+            to the service index above it, not a rival to it.
+          */}
+          <section className="section-y-sm">
+            <div className="wrap grid-12 gap-y-8">
+              <h2 data-reveal className="t-h3 col-span-12 max-w-[14ch] lg:col-span-3">
+                How a repair moves through the shop
+              </h2>
+              <ol className="col-span-12 lg:col-span-8 lg:col-start-5" data-reveal data-reveal-group>
                 {process.map((step, i) => (
                   <li
                     key={step.title}
-                    className="rule grid grid-cols-[3.5rem_1fr] gap-x-6 py-8 md:grid-cols-[5rem_1fr] md:py-10"
+                    className="rule grid grid-cols-[2.25rem_1fr] items-baseline gap-x-4 py-4 md:grid-cols-[2.75rem_8rem_1fr] md:gap-x-6 md:py-5"
                   >
-                    <span className="t-h3 tnum font-medium text-mute-2">
+                    <span className="t-index tnum text-mute-2">
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <div>
-                      <h3 className="t-h3">{step.title}</h3>
-                      <p className="t-body mt-3 max-w-[52ch] text-mute">{step.copy}</p>
-                    </div>
+                    <h3 className="t-body font-medium">{step.title}</h3>
+                    <p className="t-small col-start-2 mt-1.5 max-w-[56ch] text-mute md:col-start-3 md:mt-0">
+                      {step.copy}
+                    </p>
                   </li>
                 ))}
                 <li className="rule" aria-hidden="true" />

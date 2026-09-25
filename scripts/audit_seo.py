@@ -370,9 +370,15 @@ def audit_page(path: Path, known_routes: set[str], origin: str) -> None:
 
     # --- iframes ----------------------------------------------------------
     for frame in page.iframes:
-        if not frame.get("title"):
+        title = frame.get("title", "")
+        if not title:
             fail(route, "<iframe> without a title attribute")
-        if frame.get("loading") != "lazy":
+        # A third-party iframe should normally wait until it is needed. The
+        # location map is the deliberate exception: a visitor looking for the
+        # shop should not have to wait for it, so it is eager by instruction.
+        # Exempting it keeps this warning meaningful instead of firing on
+        # every page forever.
+        elif frame.get("loading") != "lazy" and not title.startswith("Map showing"):
             warn(route, "<iframe> is not lazy-loaded")
 
     # --- links ------------------------------------------------------------

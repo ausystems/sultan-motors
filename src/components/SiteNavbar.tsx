@@ -107,7 +107,12 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
 
           <ul className="hidden items-center gap-7 text-[14px] font-medium text-ink/65 lg:flex xl:gap-9">
             <li>
-              <SiteLink to="/" exact activeClassName="text-ink" className="transition-colors hover:text-ink">
+              <SiteLink
+                to="/"
+                exact
+                activeClassName="text-ink"
+                className="flex min-h-11 items-center transition-colors hover:text-ink"
+              >
                 Home
               </SiteLink>
             </li>
@@ -124,7 +129,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
                 onClick={() => setServicesOpen((o) => !o)}
                 aria-expanded={servicesOpen}
                 aria-controls="services-menu"
-                className={`flex items-center gap-1.5 transition-colors hover:text-ink ${
+                className={`flex min-h-11 items-center gap-1.5 transition-colors hover:text-ink ${
                   pathname.endsWith('-brampton') ? 'text-ink' : ''
                 }`}
               >
@@ -160,7 +165,11 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
             </li>
             {primary.slice(1).map((link) => (
               <li key={link.to}>
-                <SiteLink to={link.to} activeClassName="text-ink" className="transition-colors hover:text-ink">
+                <SiteLink
+                  to={link.to}
+                  activeClassName="text-ink"
+                  className="flex min-h-11 items-center transition-colors hover:text-ink"
+                >
                   {link.label}
                 </SiteLink>
               </li>
@@ -175,7 +184,7 @@ export default function SiteNavbar(_props: { theme?: 'dark' } = {}) {
                 target="_blank"
                 rel="noreferrer noopener"
                 aria-label={label}
-                className="hidden h-9 w-9 items-center justify-center rounded-full text-ink/65 transition-colors hover:text-ink sm:inline-flex"
+                className="hidden h-11 w-11 items-center justify-center rounded-full text-ink/65 transition-colors hover:text-ink sm:inline-flex"
               >
                 <Icon className="h-[18px] w-[18px]" />
               </a>

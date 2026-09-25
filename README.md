@@ -85,7 +85,13 @@ JavaScript. `prefers-reduced-motion` disables all of it.
   lines client-side (SplitText, which mirrors the text for assistive tech) and
   each line rises out of its own mask.
 - `useReveal`: scroll-linked entrances for anything marked `data-reveal`,
-  with `image` and `line` variants and `data-reveal-group` for staggers.
+  with `image`, `chars` and `line` variants and `data-reveal-group` for
+  staggers. `chars` splits a sentence into characters inside word wrappers,
+  so line breaking is unaffected, and fades them in at about a hundred a
+  second as the block reaches the viewport; the homepage statement is the one
+  place it is used. A `from` tween hides its target the moment it is built, so
+  the hook also checks that a single animation frame has been delivered and,
+  if none has, puts every element back exactly as the server rendered it.
 - `transition.ts`: the page-to-page gesture. A plain click runs a 180ms leave
   before the route changes; back and forward are left to the browser.
 

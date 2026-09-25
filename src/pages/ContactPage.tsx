@@ -367,9 +367,9 @@ export default function ContactPage() {
                         type="button"
                         onClick={goBack}
                         disabled={step === 1 || sending}
-                        className="link-ul t-body text-paper/70 hover:text-paper disabled:pointer-events-none disabled:opacity-0"
+                        className="inline-flex min-h-11 items-center self-center t-body text-paper/70 transition-colors hover:text-paper disabled:pointer-events-none disabled:opacity-0"
                       >
-                        Back
+                        <span className="link-ul">Back</span>
                       </button>
                       <button
                         type="submit"
