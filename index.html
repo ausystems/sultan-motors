@@ -18,9 +18,15 @@
          One latin file covers every weight the site uses. -->
     <link rel="preload" href="/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin />
 
-    <!-- The embedded shop map is the only third-party origin the pages touch. -->
+    <!--
+      The embedded shop map is the only third-party origin the pages touch, and
+      it loads with the page rather than on demand, so both origins get a full
+      preconnect: maps.google.com serves the frame, maps.gstatic.com the tiles.
+      Opening the TCP and TLS connections alongside the document saves those
+      round trips when the iframe starts fetching.
+    -->
     <link rel="preconnect" href="https://maps.google.com" />
-    <link rel="dns-prefetch" href="https://maps.gstatic.com" />
+    <link rel="preconnect" href="https://maps.gstatic.com" crossorigin />
 
     <!--
       Everything between these markers is replaced per route by

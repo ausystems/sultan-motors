@@ -463,7 +463,7 @@ export default function ServicePage({ config }: { config: ServiceConfig }) {
                 {business.streetAddress}, {business.addressLocality}.
               </h2>
               <div data-reveal className="mt-10 overflow-hidden bg-paper-3">
-                <MapEmbed tone="light" />
+                <MapEmbed />
               </div>
             </div>
           </section>

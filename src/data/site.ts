@@ -103,7 +103,7 @@ export const openingHours = [
   },
 ]
 
-/** A Google Maps search for the shop, for the map facade and the `hasMap` property. */
+/** A Google Maps search for the shop, used by the `hasMap` schema property. */
 export const mapsQuery = encodeURIComponent(
   `${business.streetAddress} ${business.addressLocality} ${business.addressRegion} ${business.postalCode}`,
 )

@@ -441,7 +441,7 @@ export default function ContactPage() {
                 </dl>
               </div>
               <div data-reveal className="mt-14 overflow-hidden bg-ink-3">
-                <MapEmbed tone="dark" />
+                <MapEmbed />
               </div>
             </div>
           </section>

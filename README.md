@@ -104,10 +104,16 @@ that call, and restraint was the right one here.
   gives way to a blank fallback. The prerenderer reads Vite's manifest and
   emits a `modulepreload` for exactly the chunks each route needs, so a split
   route still loads alongside the entry.
-- **Google Maps is a facade** (`MapEmbed.tsx`). The address renders as text
-  with "Show map" and "Open in Google Maps"; nothing from Google loads until
-  someone asks, which keeps well over a megabyte of third-party script off
-  every page.
+- **The location map loads with the page** (`MapEmbed.tsx`). It is an iframe
+  with `loading="eager"`, since the browser default for iframes is lazy and
+  the map sits at the foot of every page, which would otherwise hold it back
+  until the visitor scrolled near. Both Google map origins get a `preconnect`
+  in `index.html` so the TLS handshakes overlap the page load rather than
+  following it. This is a deliberate trade: the embed is the heaviest
+  third-party request on the site, and it is accepted so the shop's location
+  is simply there. It renders in Google's own colours: a map is a wayfinding
+  tool first, and hue is what makes highways, parks and water legible at a
+  glance.
 - **The fallback face is metric-matched to Geist** (`Geist Fallback` in
   `index.css`: size-adjust 102.56%, ascent 100.5%, descent 29.5%), so a slow
   connection that paints before the font arrives does not shift the page when

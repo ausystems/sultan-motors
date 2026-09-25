@@ -362,7 +362,7 @@ export default function HomePage() {
                 </dl>
               </div>
               <div data-reveal className="mt-14 overflow-hidden bg-paper-3">
-                <MapEmbed tone="light" />
+                <MapEmbed />
               </div>
             </div>
           </section>

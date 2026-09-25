@@ -1,80 +1,26 @@
-import { useState } from 'react'
-import { business, mapsEmbedUrl, mapsSearchUrl } from '../data/site'
-
-interface MapEmbedProps {
-  tone?: 'light' | 'dark'
-}
+import { mapsEmbedUrl } from '../data/site'
 
 /**
- * A facade for the Google Maps embed.
+ * The Google Maps embed, present from the first render and in full colour.
  *
- * The embed pulls well over a megabyte of script and tiles the moment it
- * scrolls into view, on every page, for a map most visitors never touch. This
- * renders the address as text, with two actions: load the map in place, or
- * open the location in Google Maps, which on a phone hands off to the native
- * app for directions. Nothing from Google loads until someone asks for it.
+ * `loading="eager"` is deliberate: the default for an iframe is lazy, which
+ * would hold the map back until it neared the viewport, and the map sits at
+ * the foot of every page. The shop's location should be there the moment the
+ * page is, so it loads with everything else.
+ *
+ * No CSS filter is applied. A map is a wayfinding tool before it is a
+ * graphic element, and the colour is what makes it legible at a glance:
+ * highways, parks and water all read by hue.
  */
-export default function MapEmbed({ tone = 'light' }: MapEmbedProps) {
-  const [shown, setShown] = useState(false)
-  const dark = tone === 'dark'
-
-  if (shown) {
-    return (
-      <div>
-        <iframe
-          title="Sultan Motors location map"
-          src={mapsEmbedUrl}
-          loading="lazy"
-          className={`h-[320px] w-full sm:h-[420px] md:h-[520px] ${
-            dark ? 'grayscale invert-[0.92] hue-rotate-180' : 'grayscale'
-          }`}
-          style={{ border: 0 }}
-        />
-        <a
-          href={mapsSearchUrl}
-          target="_blank"
-          rel="noreferrer noopener"
-          className={`group mt-3 inline-flex min-h-11 items-center ${dark ? 'text-paper/80' : 'text-ink'}`}
-        >
-          <span className="link-ul">Open in Google Maps</span>
-        </a>
-      </div>
-    )
-  }
-
+export default function MapEmbed() {
   return (
-    <div
-      className={`flex h-[320px] w-full flex-col justify-between p-6 sm:h-[420px] sm:p-8 md:h-[520px] md:p-10 ${
-        dark ? 'bg-ink-3 text-paper' : 'bg-paper-3 text-ink'
-      }`}
-    >
-      <address className="not-italic">
-        <p className="t-index mb-4 opacity-50">Find us</p>
-        <p className="t-h3">{business.streetAddress}</p>
-        <p className="t-h3">
-          {business.addressLocality}, {business.addressRegion} {business.postalCode}
-        </p>
-      </address>
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={() => setShown(true)}
-          className={`btn ${dark ? 'btn-accent' : 'btn-ink'}`}
-        >
-          Show map
-        </button>
-        <a
-          href={mapsSearchUrl}
-          target="_blank"
-          rel="noreferrer noopener"
-          className={`btn ${dark ? 'btn-ghost-dark' : 'btn-ghost'}`}
-        >
-          Open in Google Maps
-          <span className="arrow" aria-hidden="true">
-            ↗
-          </span>
-        </a>
-      </div>
-    </div>
+    <iframe
+      title="Map showing Sultan Motors at 5 Melanie Dr Unit 2, Brampton, Ontario"
+      src={mapsEmbedUrl}
+      loading="eager"
+      referrerPolicy="no-referrer-when-downgrade"
+      className="h-[320px] w-full sm:h-[420px] md:h-[520px]"
+      style={{ border: 0 }}
+    />
   )
 }
