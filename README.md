@@ -92,8 +92,20 @@ JavaScript. `prefers-reduced-motion` disables all of it.
   place it is used. A `from` tween hides its target the moment it is built, so
   the hook also checks that a single animation frame has been delivered and,
   if none has, puts every element back exactly as the server rendered it.
-- `transition.ts`: the page-to-page gesture. A plain click runs a 180ms leave
-  before the route changes; back and forward are left to the browser.
+- `transition.ts`: the page-to-page gesture, the twelve column curtain.
+  Columns of ink on the same grid the layouts use close over the outgoing page
+  from the top edge, each delayed eleven milliseconds behind the last so the
+  accent hairline on their edges rakes across the screen rather than falling
+  flat. The route swaps behind them, the scroll is reset instantly while
+  nothing is visible, and the columns carry on downward and off the bottom.
+  The motion never reverses, which is what makes a new page read as beginning
+  at its top instead of being scrolled there. 361ms to cover, 441ms to clear.
+
+  The animation is CSS rather than GSAP, and deliberately so: it is the only
+  thing on the site that covers the whole screen, so it must not depend on the
+  frame loop. A CSS transition runs on the compositor and, more importantly,
+  has the visible state as its resting style, so a stall shows no animation
+  rather than no page. Back and forward are left to the browser.
 
 Three.js was considered and left out. A WebGL displacement on the photographs
 would cost roughly 150 KB of script and real GPU time on phones for an effect

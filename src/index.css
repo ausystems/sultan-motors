@@ -294,6 +294,114 @@
   }
 
   /*
+   * The page transition.
+   *
+   * Twelve ink columns on the same twelve column grid every layout is built
+   * on. They travel downward and never back: they close over the outgoing
+   * page from the top edge, the route swaps behind them, and they continue
+   * down and off the bottom to uncover the new one. Because the motion only
+   * ever goes one way, a new page reads as arriving at its top rather than
+   * being scrolled there.
+   *
+   * Each column carries a one pixel accent line on its leading and trailing
+   * edges, and each is delayed a few milliseconds behind the one before it,
+   * so that line rakes across the screen instead of falling flat while the
+   * whole thing still reads as one gesture rather than twelve.
+   *
+   * This is deliberately CSS rather than GSAP. It is the one animation on the
+   * site that covers the entire screen, so it must not depend on the frame
+   * loop: a transition that stalls here leaves a visitor staring at a black
+   * rectangle. A CSS transition is driven by the compositor, runs when the
+   * main thread is busy, and, crucially, has the visible state as its
+   * resting style, so the failure mode is no animation rather than no page.
+   * transition.ts only flips the phase attribute.
+   */
+  .page-curtain {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .page-curtain[data-phase="cover"],
+  .page-curtain[data-phase="reveal"] {
+    visibility: visible;
+    /* Swallows clicks while covered, so an impatient second click cannot
+       start a second navigation underneath the curtain. */
+    pointer-events: auto;
+  }
+  .page-curtain > span {
+    display: block;
+    overflow: hidden;
+  }
+  .page-curtain > span > i {
+    display: block;
+    height: 100%;
+    background-color: var(--color-ink);
+    border-top: 1px solid var(--color-accent);
+    border-bottom: 1px solid var(--color-accent);
+    transform: translateY(-101%);
+    /* The rake: a per-column delay, written once when the curtain is built. */
+    transition: transform 240ms cubic-bezier(0.55, 0, 1, 0.45)
+      var(--column-delay, 0ms);
+  }
+  /* Parked above the viewport with the transition switched off, so re-arming
+     between one navigation and the next never animates backwards. */
+  .page-curtain[data-phase="idle"] > span > i {
+    transition: none;
+  }
+  .page-curtain[data-phase="cover"] > span > i {
+    transform: translateY(0);
+  }
+  .page-curtain[data-phase="reveal"] > span > i {
+    transform: translateY(101%);
+    /* Out quicker than in, and easing off hard, so the new page is legible
+       well before the last column clears the bottom edge. */
+    transition-duration: 320ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* A whisper of recession on the page behind the closing columns. */
+  .page-leaving {
+    transform: scale(0.994);
+    transition: transform 360ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /*
+   * The incoming page settles as the columns clear. No fill mode: before the
+   * animation starts and after it ends the element carries its ordinary
+   * style, so content can never be stranded at opacity zero.
+   */
+  @keyframes page-settle {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .page-settling {
+    animation: page-settle 420ms var(--ease-out-quart);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-curtain {
+      display: none;
+    }
+    .page-leaving,
+    .page-settling {
+      transform: none;
+      transition: none;
+      animation: none;
+    }
+  }
+
+  /*
    * Inline link with a drawn underline. The line grows from the left on
    * hover rather than appearing, which reads as a deliberate gesture.
    */

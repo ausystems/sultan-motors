@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef, type ComponentType } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { serviceConfigs, type ServiceConfig } from './data/services'
-import { enterPage } from './motion/transition'
+import { enterPage, resetScroll } from './motion/transition'
 
 export interface PageModules {
   Home: ComponentType
@@ -12,19 +12,25 @@ export interface PageModules {
 }
 
 /**
- * Resets scroll on navigation and settles the incoming page. The very first
- * render is skipped: the hero's own entrance handles that, and the server
- * rendered markup must not be touched before hydration completes.
+ * Resets scroll on navigation and uncovers the incoming page.
+ *
+ * The very first render is skipped entirely. The hero's own entrance handles
+ * the opening, the server rendered markup must not be touched before
+ * hydration completes, and the scroll position on a first load belongs to the
+ * browser: it is either the top of a fresh visit, the anchor in a link that
+ * carried one, or the place a reload should return someone to. Forcing it to
+ * zero would undo all three. Every navigation after that is a new page, which
+ * always begins at its top.
  */
 function RouteChange() {
   const { pathname } = useLocation()
   const first = useRef(true)
   useEffect(() => {
-    window.scrollTo(0, 0)
     if (first.current) {
       first.current = false
       return
     }
+    resetScroll()
     enterPage()
   }, [pathname])
   return null
