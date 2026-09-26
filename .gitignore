@@ -30,3 +30,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Added by `vercel link`: the project link and the local OIDC token.
+.vercel
+.env*
+# The checked-in template is the one env file that belongs in the repo.
+!.env.example
